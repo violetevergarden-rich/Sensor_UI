@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="TextAppearance.SensorMonitor.DataLabel" parent="TextAppearance.Material3.BodySmall">
+        <item name="android:textColor">@color/text_secondary</item>
+        <item name="android:textSize">@dimen/data_label_text_size</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:autoSizeTextType">uniform</item>
+        <item name="android:autoSizeMinTextSize">@dimen/data_label_min_text_size</item>
+        <item name="android:autoSizeMaxTextSize">@dimen/data_label_text_size</item>
+        <item name="android:autoSizeStepGranularity">1sp</item>
+    </style>
+
+    <style name="TextAppearance.SensorMonitor.DataValue" parent="TextAppearance.Material3.BodyMedium">
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textSize">@dimen/data_value_text_size</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:autoSizeTextType">uniform</item>
+        <item name="android:autoSizeMinTextSize">@dimen/data_value_min_text_size</item>
+        <item name="android:autoSizeMaxTextSize">@dimen/data_value_text_size</item>
+        <item name="android:autoSizeStepGranularity">1sp</item>
+    </style>
+</resources>

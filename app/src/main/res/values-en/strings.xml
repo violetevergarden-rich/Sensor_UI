@@ -1,0 +1,65 @@
+<resources>
+    <string name="app_name">SensorMonitor</string>
+    <string name="app_icon">App Icon</string>
+    <string name="app_title">Real-time Sensor Monitor</string>
+    <string name="status_idle">Idle</string>
+    <string name="status_running">Running</string>
+    <string name="status_location_permission_missing">Location permission missing</string>
+
+    <string name="sensor_accel">Acceleration</string>
+    <string name="sensor_gyro">Gyroscope</string>
+    <string name="sensor_location">Location</string>
+    <string name="sensor_angle">Angle</string>
+    <string name="sensor_speed">Speed</string>
+
+    <string name="chart_label_accel">Acceleration Magnitude</string>
+    <string name="chart_label_gyro">Gyroscope Magnitude</string>
+    <string name="chart_label_location">Latitude Sample</string>
+    <string name="chart_label_angle">Orientation Sample</string>
+    <string name="chart_label_speed">Speed Sample</string>
+
+    <string name="action_start_pause">Start / Pause</string>
+    <string name="action_settings">Settings</string>
+    <string name="action_toggle_sidebar">Toggle left sidebar</string>
+
+    <string name="label_lat">Latitude</string>
+    <string name="label_lon">Longitude</string>
+    <string name="label_accel_x">Accel X</string>
+    <string name="label_accel_y">Accel Y</string>
+    <string name="label_accel_z">Accel Z</string>
+    <string name="label_gyro_x">Gyro X</string>
+    <string name="label_gyro_y">Gyro Y</string>
+    <string name="label_gyro_z">Gyro Z</string>
+    <string name="label_altitude">Altitude</string>
+    <string name="label_yaw">Yaw</string>
+    <string name="label_pitch">Pitch</string>
+    <string name="label_roll">Roll</string>
+    <string name="label_accel_mag">Accel Magnitude</string>
+    <string name="label_gyro_mag">Gyro Magnitude</string>
+    <string name="label_speed">Speed</string>
+
+    <string name="settings_dialog_title">System Settings</string>
+    <string name="settings_chart_window">Chart Window Points</string>
+    <string name="settings_chart_window_hint">150</string>
+    <string name="settings_chart_window_default">150</string>
+    <string name="settings_sample_interval">Sampling Interval (ms)</string>
+    <string name="settings_sample_interval_hint">100</string>
+    <string name="settings_sample_interval_default">100</string>
+    <string name="settings_auto_save_csv">Auto save CSV to Download/SensorLog</string>
+    <string name="settings_record_interval">Record Interval (ms)</string>
+    <string name="settings_record_interval_hint">1000</string>
+    <string name="settings_record_interval_default">1000</string>
+    <string name="settings_keep_screen_on">Keep screen on</string>
+    <string name="settings_speed_unit_kmh">Speed unit: km/h (off = m/s)</string>
+    <string name="settings_altitude_unit_ft">Altitude unit: ft (off = m)</string>
+    <string name="settings_lowpass_enabled">Enable low-pass filter</string>
+    <string name="settings_filter_alpha">Smoothing Alpha (0.01~0.99)</string>
+    <string name="settings_filter_alpha_hint">0.85</string>
+    <string name="settings_filter_alpha_default">0.85</string>
+    <string name="settings_refresh_rate_30hz">UI refresh: 30Hz (off = 10Hz)</string>
+    <string name="status_csv_ready">Logging to CSV</string>
+    <string name="status_csv_error">CSV logging error</string>
+    <string name="settings_language_english">Switch to English UI</string>
+    <string name="settings_apply">Apply</string>
+    <string name="settings_cancel">Cancel</string>
+</resources>

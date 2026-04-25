@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="settings_dialog_padding">16dp</dimen>
+    <dimen name="data_panel_padding">6dp</dimen>
+    <dimen name="data_card_margin">3dp</dimen>
+    <dimen name="data_card_padding">6dp</dimen>
+    <dimen name="data_label_text_size">10sp</dimen>
+    <dimen name="data_value_text_size">12sp</dimen>
+    <dimen name="data_label_min_text_size">8sp</dimen>
+    <dimen name="data_value_min_text_size">10sp</dimen>
+    <dimen name="sidebar_handle_touch_width">40dp</dimen>
+    <dimen name="sidebar_handle_touch_height">72dp</dimen>
+    <dimen name="sidebar_handle_visual_width">16dp</dimen>
+    <dimen name="sidebar_handle_visual_height">64dp</dimen>
+</resources>

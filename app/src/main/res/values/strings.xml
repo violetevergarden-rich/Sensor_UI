@@ -1,0 +1,65 @@
+<resources>
+    <string name="app_name">SensorMonitor</string>
+    <string name="app_icon">应用图标</string>
+    <string name="app_title">智能路况巡检仪</string>
+    <string name="status_idle">空闲</string>
+    <string name="status_running">采集中</string>
+    <string name="status_location_permission_missing">定位权限未授予</string>
+
+    <string name="sensor_accel">加速度</string>
+    <string name="sensor_gyro">陀螺仪</string>
+    <string name="sensor_location">位置</string>
+    <string name="sensor_angle">角度</string>
+    <string name="sensor_speed">速度</string>
+
+    <string name="chart_label_accel">加速度模长</string>
+    <string name="chart_label_gyro">陀螺仪模长</string>
+    <string name="chart_label_location">纬度采样</string>
+    <string name="chart_label_angle">姿态角采样</string>
+    <string name="chart_label_speed">速度采样</string>
+
+    <string name="action_start_pause">开始 / 暂停</string>
+    <string name="action_settings">设置</string>
+    <string name="action_toggle_sidebar">收缩或展开左侧栏</string>
+
+    <string name="label_lat">纬度</string>
+    <string name="label_lon">经度</string>
+    <string name="label_accel_x">加速度 X</string>
+    <string name="label_accel_y">加速度 Y</string>
+    <string name="label_accel_z">加速度 Z</string>
+    <string name="label_gyro_x">角速度 X</string>
+    <string name="label_gyro_y">角速度 Y</string>
+    <string name="label_gyro_z">角速度 Z</string>
+    <string name="label_altitude">海拔</string>
+    <string name="label_yaw">方位角 </string>
+    <string name="label_pitch">俯仰角 </string>
+    <string name="label_roll">翻滚角 </string>
+    <string name="label_accel_mag">加速度模长</string>
+    <string name="label_gyro_mag">陀螺仪模长</string>
+    <string name="label_speed">速度</string>
+
+    <string name="settings_dialog_title">系统设置</string>
+    <string name="settings_chart_window">图表窗口点数</string>
+    <string name="settings_chart_window_hint">150</string>
+    <string name="settings_chart_window_default">150</string>
+    <string name="settings_sample_interval">采样时间（毫秒）</string>
+    <string name="settings_sample_interval_hint">100</string>
+    <string name="settings_sample_interval_default">100</string>
+    <string name="settings_auto_save_csv">自动保存CSV到 Download/SensorLog</string>
+    <string name="settings_record_interval">记录间隔（毫秒）</string>
+    <string name="settings_record_interval_hint">1000</string>
+    <string name="settings_record_interval_default">1000</string>
+    <string name="settings_keep_screen_on">屏幕常亮</string>
+    <string name="settings_speed_unit_kmh">速度单位：km/h（关闭为m/s）</string>
+    <string name="settings_altitude_unit_ft">海拔单位：ft（关闭为m）</string>
+    <string name="settings_lowpass_enabled">启用低通滤波</string>
+    <string name="settings_filter_alpha">平滑强度 Alpha（0.01~0.99）</string>
+    <string name="settings_filter_alpha_hint">0.85</string>
+    <string name="settings_filter_alpha_default">0.85</string>
+    <string name="settings_refresh_rate_30hz">UI刷新率：30Hz（关闭为10Hz）</string>
+    <string name="status_csv_ready">日志写入中</string>
+    <string name="status_csv_error">日志写入失败</string>
+    <string name="settings_language_english">切换为英文界面</string>
+    <string name="settings_apply">应用</string>
+    <string name="settings_cancel">取消</string>
+</resources>
