@@ -21,4 +21,15 @@
         <item name="android:autoSizeMaxTextSize">@dimen/data_value_text_size</item>
         <item name="android:autoSizeStepGranularity">1sp</item>
     </style>
+
+    <style name="TextAppearance.SensorMonitor.SectionTitle" parent="TextAppearance.Material3.TitleSmall">
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">@dimen/control_title_text_size</item>
+    </style>
+
+    <style name="TextAppearance.SensorMonitor.SectionHint" parent="TextAppearance.Material3.BodySmall">
+        <item name="android:textColor">@color/text_secondary</item>
+        <item name="android:textSize">@dimen/control_hint_text_size</item>
+    </style>
 </resources>

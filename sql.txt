@@ -1,0 +1,3 @@
+ssh -i miyao.pem root@47.104.147.148
+
+mysql -t -D sensor_monitor

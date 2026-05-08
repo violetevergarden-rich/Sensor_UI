@@ -62,86 +62,310 @@
             android:layout_height="match_parent"
             android:orientation="horizontal">
 
-        <LinearLayout
-            android:id="@+id/leftSidebar"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="3"
-            android:background="@color/panel_mid"
-            android:orientation="vertical"
-            android:padding="8dp">
-
             <LinearLayout
-                android:id="@+id/sensorSwitchPanel"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:orientation="vertical">
+                android:id="@+id/leftSidebar"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="3"
+                android:background="@drawable/control_panel_bg"
+                android:orientation="vertical"
+                android:padding="@dimen/control_panel_padding">
 
-                <Button
-                    android:id="@+id/btnAccel"
+                <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textAllCaps="false"
-                    android:text="@string/sensor_accel" />
+                    android:text="@string/control_panel_title"
+                    style="@style/TextAppearance.SensorMonitor.SectionTitle" />
 
-                <Button
-                    android:id="@+id/btnGyro"
+                <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:textAllCaps="false"
-                    android:text="@string/sensor_gyro" />
+                    android:layout_marginTop="2dp"
+                    android:text="@string/control_panel_hint"
+                    style="@style/TextAppearance.SensorMonitor.SectionHint" />
 
-                <Button
-                    android:id="@+id/btnLocation"
+                <androidx.core.widget.NestedScrollView
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:textAllCaps="false"
-                    android:text="@string/sensor_location" />
-
-                <Button
-                    android:id="@+id/btnAngle"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:textAllCaps="false"
-                    android:text="@string/sensor_angle" />
-
-                <Button
-                    android:id="@+id/btnSpeed"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:textAllCaps="false"
-                    android:text="@string/sensor_speed" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/bottomControlPanel"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
-
-                <Switch
-                    android:id="@+id/switchMeasure"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="0dp"
+                    android:layout_marginTop="12dp"
                     android:layout_weight="1"
-                    android:text="@string/action_start_pause" />
+                    android:fillViewport="true"
+                    android:overScrollMode="ifContentScrolls"
+                    android:scrollbars="vertical">
 
-                <ImageButton
-                    android:id="@+id/btnSettings"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:contentDescription="@string/action_settings"
-                    android:src="@android:drawable/ic_menu_manage" />
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="@dimen/control_row_margin"
+                            android:background="@drawable/control_row_bg"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:padding="@dimen/control_row_padding">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/chart_metric_latitude"
+                                style="@style/TextAppearance.SensorMonitor.DataLabel" />
+
+                            <androidx.appcompat.widget.SwitchCompat
+                                android:id="@+id/switchLatitude"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="@dimen/control_row_margin"
+                            android:background="@drawable/control_row_bg"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:padding="@dimen/control_row_padding">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/chart_metric_longitude"
+                                style="@style/TextAppearance.SensorMonitor.DataLabel" />
+
+                            <androidx.appcompat.widget.SwitchCompat
+                                android:id="@+id/switchLongitude"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="@dimen/control_row_margin"
+                            android:background="@drawable/control_row_bg"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:padding="@dimen/control_row_padding">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/chart_metric_altitude"
+                                style="@style/TextAppearance.SensorMonitor.DataLabel" />
+
+                            <androidx.appcompat.widget.SwitchCompat
+                                android:id="@+id/switchAltitude"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="@dimen/control_row_margin"
+                            android:background="@drawable/control_row_bg"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:padding="@dimen/control_row_padding">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/chart_metric_accel_x"
+                                style="@style/TextAppearance.SensorMonitor.DataLabel" />
+
+                            <androidx.appcompat.widget.SwitchCompat
+                                android:id="@+id/switchAccelX"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="@dimen/control_row_margin"
+                            android:background="@drawable/control_row_bg"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:padding="@dimen/control_row_padding">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/chart_metric_accel_y"
+                                style="@style/TextAppearance.SensorMonitor.DataLabel" />
+
+                            <androidx.appcompat.widget.SwitchCompat
+                                android:id="@+id/switchAccelY"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="@dimen/control_row_margin"
+                            android:background="@drawable/control_row_bg"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:padding="@dimen/control_row_padding">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/chart_metric_accel_z"
+                                style="@style/TextAppearance.SensorMonitor.DataLabel" />
+
+                            <androidx.appcompat.widget.SwitchCompat
+                                android:id="@+id/switchAccelZ"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="@dimen/control_row_margin"
+                            android:background="@drawable/control_row_bg"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:padding="@dimen/control_row_padding">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/chart_metric_gyro_x"
+                                style="@style/TextAppearance.SensorMonitor.DataLabel" />
+
+                            <androidx.appcompat.widget.SwitchCompat
+                                android:id="@+id/switchGyroX"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="@dimen/control_row_margin"
+                            android:background="@drawable/control_row_bg"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:padding="@dimen/control_row_padding">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/chart_metric_gyro_y"
+                                style="@style/TextAppearance.SensorMonitor.DataLabel" />
+
+                            <androidx.appcompat.widget.SwitchCompat
+                                android:id="@+id/switchGyroY"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="@dimen/control_row_margin"
+                            android:background="@drawable/control_row_bg"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:padding="@dimen/control_row_padding">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/chart_metric_gyro_z"
+                                style="@style/TextAppearance.SensorMonitor.DataLabel" />
+
+                            <androidx.appcompat.widget.SwitchCompat
+                                android:id="@+id/switchGyroZ"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="@dimen/control_row_margin"
+                            android:background="@drawable/control_row_bg"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:padding="@dimen/control_row_padding">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/chart_metric_speed"
+                                style="@style/TextAppearance.SensorMonitor.DataLabel" />
+
+                            <androidx.appcompat.widget.SwitchCompat
+                                android:id="@+id/switchSpeed"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="@dimen/control_row_margin"
+                            android:background="@drawable/control_row_bg"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:padding="@dimen/control_row_padding">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/table_visibility_label"
+                                style="@style/TextAppearance.SensorMonitor.DataLabel" />
+
+                            <androidx.appcompat.widget.SwitchCompat
+                                android:id="@+id/switchTable"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </androidx.core.widget.NestedScrollView>
+
+                <LinearLayout
+                    android:id="@+id/bottomControlPanel"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <Switch
+                        android:id="@+id/switchMeasure"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/action_start_pause" />
+
+                    <ImageButton
+                        android:id="@+id/btnSettings"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="@string/action_settings"
+                        android:src="@android:drawable/ic_menu_manage" />
+                </LinearLayout>
             </LinearLayout>
-        </LinearLayout>
 
         <LinearLayout
             android:id="@+id/rightDisplay"
@@ -367,6 +591,30 @@
                             style="@style/TextAppearance.SensorMonitor.DataLabel" />
                         <TextView
                             android:id="@+id/tvPitch"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="6dp"
+                            android:text="--"
+                            style="@style/TextAppearance.SensorMonitor.DataValue" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:layout_margin="@dimen/data_card_margin"
+                        android:background="@color/panel_mid"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:padding="@dimen/data_card_padding">
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/label_roll"
+                            style="@style/TextAppearance.SensorMonitor.DataLabel" />
+                        <TextView
+                            android:id="@+id/tvRoll"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="6dp"

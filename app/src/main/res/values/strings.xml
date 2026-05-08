@@ -6,6 +6,23 @@
     <string name="status_running">采集中</string>
     <string name="status_location_permission_missing">定位权限未授予</string>
 
+    <string name="control_panel_title">曲线控制</string>
+    <string name="control_panel_hint">可同时开启多条曲线</string>
+    <string name="data_panel_title">数据面板</string>
+    <string name="data_panel_hint">控制下方表格显示</string>
+
+    <string name="chart_metric_latitude">纬度</string>
+    <string name="chart_metric_longitude">经度</string>
+    <string name="chart_metric_altitude">海拔</string>
+    <string name="chart_metric_accel_x">加速度 X</string>
+    <string name="chart_metric_accel_y">加速度 Y</string>
+    <string name="chart_metric_accel_z">加速度 Z</string>
+    <string name="chart_metric_gyro_x">角速度 X</string>
+    <string name="chart_metric_gyro_y">角速度 Y</string>
+    <string name="chart_metric_gyro_z">角速度 Z</string>
+    <string name="chart_metric_speed">速度</string>
+    <string name="table_visibility_label">显示下方表格</string>
+
     <string name="sensor_accel">加速度</string>
     <string name="sensor_gyro">陀螺仪</string>
     <string name="sensor_location">位置</string>

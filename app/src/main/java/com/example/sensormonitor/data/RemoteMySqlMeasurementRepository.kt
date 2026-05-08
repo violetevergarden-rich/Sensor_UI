@@ -24,9 +24,20 @@ object RemoteMySqlMeasurementRepository {
                 put("record_time", measurement.recordTime.format(sqlDateTimeFormatter))
                 put("device_id", measurement.deviceId)
                 put("device_name", measurement.deviceName)
+                put("path_id", measurement.pathId)
+                put("latitude", measurement.latitude)
+                put("longitude", measurement.longitude)
+                put("altitude", measurement.altitude)
+                put("accel_x", measurement.accelX)
+                put("accel_y", measurement.accelY)
+                put("accel_z", measurement.accelZ)
+                put("gyro_x", measurement.gyroX)
+                put("gyro_y", measurement.gyroY)
+                put("gyro_z", measurement.gyroZ)
+                put("pitch", measurement.pitch)
+                put("roll", measurement.roll)
+                put("yaw", measurement.yaw)
                 put("speed", measurement.speed)
-                put("angle", measurement.angle)
-                put("distance", measurement.distance)
             }
 
             val connection = URL(INGEST_API_URL).openConnection() as HttpURLConnection

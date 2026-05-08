@@ -1,17 +1,8 @@
 package com.example.sensormonitor.model
 
-enum class ChartSensorType {
-    ACCELEROMETER,
-    GYROSCOPE,
-    LOCATION,
-    ANGLE,
-    SPEED
-}
-
 data class SensorUiState(
     val isRunning: Boolean = false,
     val statusText: String = "",
-    val chartType: ChartSensorType = ChartSensorType.ACCELEROMETER,
     val latitude: Double? = null,
     val longitude: Double? = null,
     val altitude: Double? = null,
@@ -24,6 +15,5 @@ data class SensorUiState(
     val yaw: Float = 0f,
     val pitch: Float = 0f,
     val roll: Float = 0f,
-    val speed: Float = 0f,
-    val chartSample: Float = 0f
+    val speed: Float = 0f
 )

@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import argparse
-import shlex
 import sys
 from pathlib import Path
 
@@ -40,11 +39,22 @@ USE `{database}`;
 CREATE TABLE IF NOT EXISTS `{table}` (
     id INT AUTO_INCREMENT PRIMARY KEY,
     record_time DATETIME NOT NULL,
-    device_id VARCHAR(50),
+    device_id VARCHAR(50) NOT NULL,
     device_name VARCHAR(100),
+    path_id VARCHAR(64) NOT NULL DEFAULT '',
+    latitude DOUBLE,
+    longitude DOUBLE,
+    altitude DOUBLE,
+    accel_x DOUBLE,
+    accel_y DOUBLE,
+    accel_z DOUBLE,
+    gyro_x DOUBLE,
+    gyro_y DOUBLE,
+    gyro_z DOUBLE,
+    pitch DOUBLE,
+    roll DOUBLE,
+    yaw DOUBLE,
     speed DOUBLE,
-    angle DOUBLE,
-    distance DOUBLE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 """.strip()
 
@@ -95,6 +105,46 @@ def build_remote_mysql_script(database: str, table: str, password: str) -> str:
         "    for statement in statements:\n"
         "        cursor.execute(statement)\n"
         "        print(f'Executed: {statement.splitlines()[0][:80]}')\n\n"
+        "def column_exists(cursor, database, table, column):\n"
+        "    cursor.execute(\n"
+        "        \"SELECT 1 FROM information_schema.columns WHERE table_schema = %s AND table_name = %s AND column_name = %s LIMIT 1\",\n"
+        "        (database, table, column),\n"
+        "    )\n"
+        "    return cursor.fetchone() is not None\n\n"
+        "def index_exists(cursor, database, table, index_name):\n"
+        "    cursor.execute(\n"
+        "        \"SELECT 1 FROM information_schema.statistics WHERE table_schema = %s AND table_name = %s AND index_name = %s LIMIT 1\",\n"
+        "        (database, table, index_name),\n"
+        "    )\n"
+        "    return cursor.fetchone() is not None\n\n"
+        "with connection.cursor() as cursor:\n"
+        "    column_defs = [\n"
+        "        ('path_id', \"ALTER TABLE `{table}` ADD COLUMN `path_id` VARCHAR(64) NOT NULL DEFAULT '' AFTER `device_name`\"),\n"
+        "        ('latitude', \"ALTER TABLE `{table}` ADD COLUMN `latitude` DOUBLE NULL AFTER `path_id`\"),\n"
+        "        ('longitude', \"ALTER TABLE `{table}` ADD COLUMN `longitude` DOUBLE NULL AFTER `latitude`\"),\n"
+        "        ('altitude', \"ALTER TABLE `{table}` ADD COLUMN `altitude` DOUBLE NULL AFTER `longitude`\"),\n"
+        "        ('accel_x', \"ALTER TABLE `{table}` ADD COLUMN `accel_x` DOUBLE NULL AFTER `altitude`\"),\n"
+        "        ('accel_y', \"ALTER TABLE `{table}` ADD COLUMN `accel_y` DOUBLE NULL AFTER `accel_x`\"),\n"
+        "        ('accel_z', \"ALTER TABLE `{table}` ADD COLUMN `accel_z` DOUBLE NULL AFTER `accel_y`\"),\n"
+        "        ('gyro_x', \"ALTER TABLE `{table}` ADD COLUMN `gyro_x` DOUBLE NULL AFTER `accel_z`\"),\n"
+        "        ('gyro_y', \"ALTER TABLE `{table}` ADD COLUMN `gyro_y` DOUBLE NULL AFTER `gyro_x`\"),\n"
+        "        ('gyro_z', \"ALTER TABLE `{table}` ADD COLUMN `gyro_z` DOUBLE NULL AFTER `gyro_y`\"),\n"
+        "        ('pitch', \"ALTER TABLE `{table}` ADD COLUMN `pitch` DOUBLE NULL AFTER `gyro_z`\"),\n"
+        "        ('roll', \"ALTER TABLE `{table}` ADD COLUMN `roll` DOUBLE NULL AFTER `pitch`\"),\n"
+        "        ('yaw', \"ALTER TABLE `{table}` ADD COLUMN `yaw` DOUBLE NULL AFTER `roll`\"),\n"
+        "    ]\n"
+        "    for column_name, statement_template in column_defs:\n"
+        "        if not column_exists(cursor, database, table, column_name):\n"
+        "            cursor.execute(statement_template.format(table=table))\n"
+        "            print(f'Added column: {column_name}')\n"
+        "    index_defs = [\n"
+        "        ('idx_iot_measurements_path_id', 'path_id'),\n"
+        "        ('idx_iot_measurements_record_time', 'record_time'),\n"
+        "    ]\n"
+        "    for index_name, column_name in index_defs:\n"
+        "        if not index_exists(cursor, database, table, index_name):\n"
+        "            cursor.execute(f'CREATE INDEX `{index_name}` ON `{table}` (`{column_name}`)')\n"
+        "            print(f'Created index: {index_name}')\n\n"
         "with connection.cursor() as cursor:\n"
         "    cursor.execute(\"SHOW DATABASES LIKE %s\", (database,))\n"
         "    print('Database check:', cursor.fetchone())\n"

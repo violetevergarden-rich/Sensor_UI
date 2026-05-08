@@ -60,7 +60,7 @@ class MeasurementHandler(BaseHTTPRequestHandler):
             self._send_json(400, {"ok": False, "error": "invalid json"})
             return
 
-        required = ["record_time", "device_id", "device_name"]
+        required = ["record_time", "device_id", "device_name", "path_id"]
         for field in required:
             if not payload.get(field):
                 self._send_json(400, {"ok": False, "error": f"missing field: {field}"})
@@ -71,10 +71,21 @@ class MeasurementHandler(BaseHTTPRequestHandler):
                 record_time,
                 device_id,
                 device_name,
-                speed,
-                angle,
-                distance
-            ) VALUES (%s, %s, %s, %s, %s, %s)
+                path_id,
+                latitude,
+                longitude,
+                altitude,
+                accel_x,
+                accel_y,
+                accel_z,
+                gyro_x,
+                gyro_y,
+                gyro_z,
+                pitch,
+                roll,
+                yaw,
+                speed
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
 
         try:
@@ -86,9 +97,20 @@ class MeasurementHandler(BaseHTTPRequestHandler):
                     payload.get("record_time"),
                     payload.get("device_id"),
                     payload.get("device_name"),
+                    payload.get("path_id"),
+                    payload.get("latitude"),
+                    payload.get("longitude"),
+                    payload.get("altitude"),
+                    payload.get("accel_x"),
+                    payload.get("accel_y"),
+                    payload.get("accel_z"),
+                    payload.get("gyro_x"),
+                    payload.get("gyro_y"),
+                    payload.get("gyro_z"),
+                    payload.get("pitch"),
+                    payload.get("roll"),
+                    payload.get("yaw"),
                     payload.get("speed"),
-                    payload.get("angle"),
-                    payload.get("distance"),
                 ))
                 inserted_id = cursor.lastrowid
             conn.close()

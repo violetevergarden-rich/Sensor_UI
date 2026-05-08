@@ -22,25 +22,27 @@ import android.util.Log
 import android.view.WindowManager
 import android.view.animation.AccelerateDecelerateInterpolator
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.widget.SwitchCompat
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.doOnLayout
+import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.example.sensormonitor.data.RemoteMySqlMeasurementRepository
 import com.example.sensormonitor.databinding.ActivityMainBinding
 import com.example.sensormonitor.model.AltitudeUnit
 import com.example.sensormonitor.model.AppSettings
-import com.example.sensormonitor.model.ChartSensorType
 import com.example.sensormonitor.model.IotMeasurement
 import com.example.sensormonitor.model.SensorUiState
 import com.example.sensormonitor.model.SpeedUnit
 import com.example.sensormonitor.model.UiRefreshRate
+import com.github.mikephil.charting.components.Legend
+import com.github.mikephil.charting.components.LegendEntry
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
-import com.github.mikephil.charting.interfaces.datasets.ILineDataSet
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
@@ -57,7 +59,9 @@ import java.io.OutputStreamWriter
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 import java.util.Date
+import java.util.EnumMap
 import java.util.Locale
+import java.util.UUID
 import kotlin.math.sqrt
 
 class MainActivity : AppCompatActivity(), SensorEventListener, SettingsDialogFragment.Listener {
@@ -82,6 +86,22 @@ class MainActivity : AppCompatActivity(), SensorEventListener, SettingsDialogFra
         private const val KEY_UI_REFRESH_RATE = "ui_refresh_rate"
     }
 
+    private enum class ChartMetric(
+        val labelRes: Int,
+        val colorRes: Int,
+    ) {
+        LATITUDE(R.string.chart_metric_latitude, R.color.chart_latitude),
+        LONGITUDE(R.string.chart_metric_longitude, R.color.chart_longitude),
+        ALTITUDE(R.string.chart_metric_altitude, R.color.chart_altitude),
+        ACCEL_X(R.string.chart_metric_accel_x, R.color.chart_accel_x),
+        ACCEL_Y(R.string.chart_metric_accel_y, R.color.chart_accel_y),
+        ACCEL_Z(R.string.chart_metric_accel_z, R.color.chart_accel_z),
+        GYRO_X(R.string.chart_metric_gyro_x, R.color.chart_gyro_x),
+        GYRO_Y(R.string.chart_metric_gyro_y, R.color.chart_gyro_y),
+        GYRO_Z(R.string.chart_metric_gyro_z, R.color.chart_gyro_z),
+        SPEED(R.string.chart_metric_speed, R.color.chart_speed)
+    }
+
     private lateinit var binding: ActivityMainBinding
 
     private lateinit var sensorManager: SensorManager
@@ -96,7 +116,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener, SettingsDialogFra
     private var isCollectionStarted = false
     private var isSidebarCollapsed = false
     private var sampleIndex = 0f
-    private var smoothedChartValue: Float? = null
+    private val chartDataSets = EnumMap<ChartMetric, LineDataSet>(ChartMetric::class.java)
+    private val smoothedSeriesValues = EnumMap<ChartMetric, Float>(ChartMetric::class.java)
 
     private var uiTickerJob: Job? = null
     private var csvWriterJob: Job? = null
@@ -113,6 +134,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener, SettingsDialogFra
             .joinToString(" ")
             .ifBlank { "unknown_device" }
     }
+    private var currentPathId: String = ""
 
     private var accelX = 0f
     private var accelY = 0f
@@ -257,6 +279,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener, SettingsDialogFra
             currentLanguageCode = settings.languageCode
             recreate()
         }
+        trimChartIfNeeded()
     }
 
     fun showSettingsDialog() {
@@ -275,24 +298,47 @@ class MainActivity : AppCompatActivity(), SensorEventListener, SettingsDialogFra
     }
 
     private fun setupControls() {
-        binding.btnAccel.setOnClickListener { selectChartType(ChartSensorType.ACCELEROMETER) }
-        binding.btnGyro.setOnClickListener { selectChartType(ChartSensorType.GYROSCOPE) }
-        binding.btnLocation.setOnClickListener { selectChartType(ChartSensorType.LOCATION) }
-        binding.btnAngle.setOnClickListener { selectChartType(ChartSensorType.ANGLE) }
-        binding.btnSpeed.setOnClickListener { selectChartType(ChartSensorType.SPEED) }
+        bindSeriesSwitch(binding.switchLatitude, ChartMetric.LATITUDE, false)
+        bindSeriesSwitch(binding.switchLongitude, ChartMetric.LONGITUDE, false)
+        bindSeriesSwitch(binding.switchAltitude, ChartMetric.ALTITUDE, false)
+        bindSeriesSwitch(binding.switchAccelX, ChartMetric.ACCEL_X, true)
+        bindSeriesSwitch(binding.switchAccelY, ChartMetric.ACCEL_Y, true)
+        bindSeriesSwitch(binding.switchAccelZ, ChartMetric.ACCEL_Z, true)
+        bindSeriesSwitch(binding.switchGyroX, ChartMetric.GYRO_X, false)
+        bindSeriesSwitch(binding.switchGyroY, ChartMetric.GYRO_Y, false)
+        bindSeriesSwitch(binding.switchGyroZ, ChartMetric.GYRO_Z, false)
+        bindSeriesSwitch(binding.switchSpeed, ChartMetric.SPEED, true)
+
+        binding.switchTable.setOnCheckedChangeListener(null)
+        binding.switchTable.isChecked = true
+        binding.dataPanel.isVisible = true
+        binding.switchTable.setOnCheckedChangeListener { _, checked ->
+            binding.dataPanel.isVisible = checked
+        }
+
         binding.sidebarHandleTouch.setOnClickListener { toggleSidebar() }
         binding.btnSettings.setOnClickListener { showSettingsDialog() }
 
         binding.switchMeasure.setOnCheckedChangeListener { _, checked ->
             if (checked) startCollection() else stopCollection()
         }
+
+        refreshChartPresentation()
     }
 
     private fun setupChart() {
-        binding.lineChart.data = LineData(createDataSet(ChartSensorType.ACCELEROMETER))
+        val lineData = LineData()
+        ChartMetric.values().forEach { metric ->
+            val dataSet = createDataSet(metric)
+            chartDataSets[metric] = dataSet
+            lineData.addDataSet(dataSet)
+        }
+        binding.lineChart.data = lineData
         binding.lineChart.description.isEnabled = false
         binding.lineChart.legend.isEnabled = true
+        binding.lineChart.legend.isWordWrapEnabled = true
         binding.lineChart.legend.textColor = ContextCompat.getColor(this, R.color.text_secondary)
+        binding.lineChart.legend.form = Legend.LegendForm.LINE
         binding.lineChart.axisRight.isEnabled = false
         binding.lineChart.xAxis.position = XAxis.XAxisPosition.BOTTOM
         binding.lineChart.xAxis.setDrawGridLines(false)
@@ -301,6 +347,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener, SettingsDialogFra
         binding.lineChart.axisLeft.textColor = ContextCompat.getColor(this, R.color.text_secondary)
         binding.lineChart.setNoDataText("")
         binding.lineChart.setBackgroundColor(ContextCompat.getColor(this, R.color.panel_mid))
+        refreshChartPresentation()
     }
 
     private fun collectUiState() {
@@ -316,23 +363,31 @@ class MainActivity : AppCompatActivity(), SensorEventListener, SettingsDialogFra
                     binding.tvGyroMag.text = "%.3f".format(sqrt(state.gyroX * state.gyroX + state.gyroY * state.gyroY + state.gyroZ * state.gyroZ))
                     binding.tvYaw.text = "%.1f°".format(state.yaw)
                     binding.tvPitch.text = "%.1f°".format(state.pitch)
-                    appendChartPoint(state.chartSample)
+                    binding.tvRoll.text = "%.1f°".format(state.roll)
+
+                    if (state.isRunning) {
+                        appendChartPoints(state)
+                    }
                 }
             }
         }
     }
 
-    private fun selectChartType(type: ChartSensorType) {
-        if (uiState.value.chartType == type) return
-        uiState.value = uiState.value.copy(chartType = type)
-        smoothedChartValue = null
-        resetChart(type)
+    private fun bindSeriesSwitch(switchView: SwitchCompat, metric: ChartMetric, defaultVisible: Boolean) {
+        switchView.setOnCheckedChangeListener(null)
+        switchView.isChecked = defaultVisible
+        chartDataSets[metric]?.isVisible = defaultVisible
+        switchView.setOnCheckedChangeListener { _, checked ->
+            setSeriesVisible(metric, checked)
+        }
     }
 
     private fun startCollection() {
         if (isCollectionStarted) return
         isCollectionStarted = true
         applyRuntimeSettings()
+        currentPathId = UUID.randomUUID().toString()
+        smoothedSeriesValues.clear()
 
         accelerometer?.also { sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_GAME) }
         gyroscope?.also { sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_GAME) }
@@ -346,13 +401,9 @@ class MainActivity : AppCompatActivity(), SensorEventListener, SettingsDialogFra
         uiTickerJob = lifecycleScope.launch {
             while (isActive && isCollectionStarted) {
                 val snapshot = synchronized(lock) {
-                    val currentType = uiState.value.chartType
-                    val rawSample = resolveChartSample(currentType)
-                    val chartSample = applyChartSmoothing(rawSample)
                     SensorUiState(
                         isRunning = true,
                         statusText = if (appSettings.autoSaveCsv) getString(R.string.status_csv_ready) else getString(R.string.status_running),
-                        chartType = currentType,
                         latitude = latitude,
                         longitude = longitude,
                         altitude = altitude,
@@ -365,8 +416,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener, SettingsDialogFra
                         yaw = yaw,
                         pitch = pitch,
                         roll = roll,
-                        speed = resolveSpeed(),
-                        chartSample = chartSample
+                        speed = resolveSpeed()
                     )
                 }
                 uiState.value = snapshot
@@ -412,25 +462,30 @@ class MainActivity : AppCompatActivity(), SensorEventListener, SettingsDialogFra
             ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
     }
 
-    private fun resolveChartSample(type: ChartSensorType): Float {
-        return when (type) {
-            ChartSensorType.ACCELEROMETER -> sqrt(accelX * accelX + accelY * accelY + accelZ * accelZ)
-            ChartSensorType.GYROSCOPE -> sqrt(gyroX * gyroX + gyroY * gyroY + gyroZ * gyroZ)
-            ChartSensorType.LOCATION -> (latitude ?: 0.0).toFloat()
-            ChartSensorType.ANGLE -> yaw
-            ChartSensorType.SPEED -> resolveSpeed()
+    private fun seriesValue(metric: ChartMetric, state: SensorUiState): Float {
+        return when (metric) {
+            ChartMetric.LATITUDE -> state.latitude?.toFloat() ?: 0f
+            ChartMetric.LONGITUDE -> state.longitude?.toFloat() ?: 0f
+            ChartMetric.ALTITUDE -> state.altitude?.toFloat() ?: 0f
+            ChartMetric.ACCEL_X -> state.accelX
+            ChartMetric.ACCEL_Y -> state.accelY
+            ChartMetric.ACCEL_Z -> state.accelZ
+            ChartMetric.GYRO_X -> state.gyroX
+            ChartMetric.GYRO_Y -> state.gyroY
+            ChartMetric.GYRO_Z -> state.gyroZ
+            ChartMetric.SPEED -> state.speed
         }
     }
 
-    private fun applyChartSmoothing(raw: Float): Float {
+    private fun smoothSeriesValue(metric: ChartMetric, raw: Float): Float {
         if (!appSettings.smoothingEnabled) {
-            smoothedChartValue = null
+            smoothedSeriesValues.remove(metric)
             return raw
         }
         val alpha = appSettings.smoothingAlpha
-        val prev = smoothedChartValue ?: raw
+        val prev = smoothedSeriesValues[metric] ?: raw
         val smoothed = alpha * prev + (1f - alpha) * raw
-        smoothedChartValue = smoothed
+        smoothedSeriesValues[metric] = smoothed
         return smoothed
     }
 
@@ -458,71 +513,79 @@ class MainActivity : AppCompatActivity(), SensorEventListener, SettingsDialogFra
         }
     }
 
-    private fun appendChartPoint(value: Float) {
+    private fun appendChartPoints(state: SensorUiState) {
         val data = binding.lineChart.data ?: return
-        val dataSet = data.getDataSetByIndex(0) ?: return
-        dataSet.addEntry(Entry(sampleIndex, value))
+        ChartMetric.values().forEach { metric ->
+            val dataSet = chartDataSets[metric] ?: return@forEach
+            val value = smoothSeriesValue(metric, seriesValue(metric, state))
+            dataSet.addEntry(Entry(sampleIndex, value))
+        }
         sampleIndex += 1f
 
-        while (dataSet.entryCount > appSettings.chartWindowSize) {
-            dataSet.removeFirst()
-        }
-
-        updateDynamicYAxis(dataSet)
+        trimChartIfNeeded()
         data.notifyDataChanged()
         binding.lineChart.notifyDataSetChanged()
         binding.lineChart.setVisibleXRangeMaximum(appSettings.chartWindowSize.toFloat())
         binding.lineChart.moveViewToX(sampleIndex)
-    }
-
-    private fun resetChart(type: ChartSensorType) {
-        sampleIndex = 0f
-        binding.lineChart.clear()
-        binding.lineChart.data = LineData(createDataSet(type))
         binding.lineChart.invalidate()
     }
 
-    private fun trimChartIfNeeded() {
-        val dataSet = binding.lineChart.data?.getDataSetByIndex(0) ?: return
-        while (dataSet.entryCount > appSettings.chartWindowSize) {
-            dataSet.removeFirst()
-        }
-        updateDynamicYAxis(dataSet)
-        binding.lineChart.data?.notifyDataChanged()
-        binding.lineChart.notifyDataSetChanged()
+    private fun setSeriesVisible(metric: ChartMetric, visible: Boolean) {
+        chartDataSets[metric]?.isVisible = visible
+        refreshChartPresentation()
     }
 
-    private fun createDataSet(type: ChartSensorType): LineDataSet {
-        val labelRes = when (type) {
-            ChartSensorType.ACCELEROMETER -> R.string.chart_label_accel
-            ChartSensorType.GYROSCOPE -> R.string.chart_label_gyro
-            ChartSensorType.LOCATION -> R.string.chart_label_location
-            ChartSensorType.ANGLE -> R.string.chart_label_angle
-            ChartSensorType.SPEED -> R.string.chart_label_speed
+    private fun trimChartIfNeeded() {
+        chartDataSets.values.forEach { dataSet ->
+            while (dataSet.entryCount > appSettings.chartWindowSize) {
+                dataSet.removeFirst()
+            }
         }
-        val colorRes = when (type) {
-            ChartSensorType.ACCELEROMETER -> R.color.chart_accel
-            ChartSensorType.GYROSCOPE -> R.color.chart_gyro
-            ChartSensorType.LOCATION -> R.color.chart_location
-            ChartSensorType.ANGLE -> R.color.chart_angle
-            ChartSensorType.SPEED -> R.color.chart_speed
-        }
-        return LineDataSet(mutableListOf(), getString(labelRes)).apply {
-            color = ContextCompat.getColor(this@MainActivity, colorRes)
+        updateDynamicYAxis()
+    }
+
+    private fun refreshChartPresentation() {
+        updateChartLegend()
+        updateDynamicYAxis()
+        binding.lineChart.data?.notifyDataChanged()
+        binding.lineChart.notifyDataSetChanged()
+        binding.lineChart.invalidate()
+    }
+
+    private fun createDataSet(metric: ChartMetric): LineDataSet {
+        return LineDataSet(mutableListOf(), getString(metric.labelRes)).apply {
+            color = ContextCompat.getColor(this@MainActivity, metric.colorRes)
             setDrawValues(false)
             setDrawCircles(false)
             lineWidth = 1.8f
+            mode = LineDataSet.Mode.LINEAR
         }
     }
 
-    private fun updateDynamicYAxis(dataSet: ILineDataSet) {
-        if (dataSet.entryCount == 0) return
-        val yMin = dataSet.yMin
-        val yMax = dataSet.yMax
+    private fun updateDynamicYAxis() {
+        val visibleDataSets = chartDataSets.values.filter { it.isVisible && it.entryCount > 0 }
+        if (visibleDataSets.isEmpty()) return
+
+        val yMin = visibleDataSets.minOf { it.yMin }
+        val yMax = visibleDataSets.maxOf { it.yMax }
         val baseRange = (yMax - yMin).coerceAtLeast(MIN_Y_RANGE)
         val margin = baseRange * 0.2f
         binding.lineChart.axisLeft.axisMinimum = yMin - margin
         binding.lineChart.axisLeft.axisMaximum = yMax + margin
+    }
+
+    private fun updateChartLegend() {
+        val legendEntries = chartDataSets.values
+            .filter { it.isVisible }
+            .map { dataSet ->
+                LegendEntry().apply {
+                    label = dataSet.label
+                    formColor = dataSet.color
+                    form = Legend.LegendForm.LINE
+                }
+            }
+        binding.lineChart.legend.isEnabled = legendEntries.isNotEmpty()
+        binding.lineChart.legend.setCustom(legendEntries)
     }
 
     private fun updateEstimatedSpeed(event: SensorEvent) {
@@ -594,7 +657,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener, SettingsDialogFra
                 val file = File(dir, fileName)
                 BufferedWriter(FileWriter(file, false))
             }
-            writer.write("timestamp,lat,lon,altitude,speed,accelMag,gyroMag,yaw,pitch")
+            writer.write("timestamp,path_id,lat,lon,altitude,speed,accel_x,accel_y,accel_z,gyro_x,gyro_y,gyro_z,pitch,roll,yaw")
             writer.newLine()
             writer.flush()
             writer
@@ -605,6 +668,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener, SettingsDialogFra
 
     private fun writeCsvRow() {
         val snapshot = synchronized(lock) {
+            val speedMs = resolveSpeed().toDouble()
             val speedText = when (appSettings.speedUnit) {
                 SpeedUnit.MS -> resolveSpeed().toDouble()
                 SpeedUnit.KMH -> resolveSpeed().toDouble() * 3.6
@@ -613,16 +677,25 @@ class MainActivity : AppCompatActivity(), SensorEventListener, SettingsDialogFra
                 AltitudeUnit.METER -> altitude
                 AltitudeUnit.FEET -> altitude?.times(3.28084)
             }
-            val accelMag = sqrt(accelX * accelX + accelY * accelY + accelZ * accelZ)
-            val gyroMag = sqrt(gyroX * gyroX + gyroY * gyroY + gyroZ * gyroZ)
-            val row = "${System.currentTimeMillis()},${latitude ?: ""},${longitude ?: ""},${altitudeValue ?: ""},$speedText,$accelMag,$gyroMag,$yaw,$pitch"
+            val row = "${System.currentTimeMillis()},$currentPathId,${latitude ?: ""},${longitude ?: ""},${altitudeValue ?: ""},$speedText,$accelX,$accelY,$accelZ,$gyroX,$gyroY,$gyroZ,$pitch,$roll,$yaw"
             val measurement = IotMeasurement(
                 recordTime = LocalDateTime.now(),
                 deviceId = deviceId,
                 deviceName = deviceName,
-                speed = speedText,
-                angle = yaw.toDouble(),
-                distance = altitudeValue
+                pathId = currentPathId,
+                latitude = latitude,
+                longitude = longitude,
+                altitude = altitudeValue,
+                accelX = accelX.toDouble(),
+                accelY = accelY.toDouble(),
+                accelZ = accelZ.toDouble(),
+                gyroX = gyroX.toDouble(),
+                gyroY = gyroY.toDouble(),
+                gyroZ = gyroZ.toDouble(),
+                pitch = pitch.toDouble(),
+                roll = roll.toDouble(),
+                yaw = yaw.toDouble(),
+                speed = speedMs,
             )
             row to measurement
         }

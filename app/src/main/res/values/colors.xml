@@ -7,9 +7,15 @@
     <color name="panel_soft">#FFEFF3F8</color>
     <color name="text_primary">#FF1F2A36</color>
     <color name="text_secondary">#FF5A6775</color>
-    <color name="chart_accel">#3DDC97</color>
-    <color name="chart_gyro">#4FC3F7</color>
-    <color name="chart_location">#FFB74D</color>
-    <color name="chart_angle">#9575CD</color>
+    <color name="control_border">#1F5A6775</color>
+    <color name="chart_latitude">#FF8A65</color>
+    <color name="chart_longitude">#FFB74D</color>
+    <color name="chart_altitude">#F06292</color>
+    <color name="chart_accel_x">#3DDC97</color>
+    <color name="chart_accel_y">#00BFA5</color>
+    <color name="chart_accel_z">#26C6DA</color>
+    <color name="chart_gyro_x">#4FC3F7</color>
+    <color name="chart_gyro_y">#29B6F6</color>
+    <color name="chart_gyro_z">#42A5F5</color>
     <color name="chart_speed">#EF5350</color>
 </resources>
