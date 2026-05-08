@@ -276,7 +276,6 @@ class UsbSerialManager(
                             if (line.startsWith("$")) {
                                 val data = gpsParser.parse(line)
                                 if (data != null) {
-                                    Log.d(TAG, "GPS parsed: lat=${data.latitude}, lon=${data.longitude}")
                                     onGpsData(data)
                                 }
                             }
@@ -306,13 +305,6 @@ class UsbSerialManager(
                     if (len < 0) break
                     if (len > 0) {
                         val frames = imuParser.feed(buffer.copyOf(len))
-                        if (frames.isNotEmpty()) {
-                            val acc = frames.find { it.accelX != null }
-                            val gyr = frames.find { it.gyroX != null }
-                            val mag = frames.find { it.magX != null }
-                            val ang = frames.find { it.roll != null }
-                            Log.d(TAG, "IMU frames: ${frames.size} | acc=${acc?.accelX} gyro=${gyr?.gyroX} mag=${mag?.magX} roll=${ang?.roll}")
-                        }
                         for (frame in frames) {
                             onImuData(frame)
                         }

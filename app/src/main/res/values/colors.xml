@@ -23,6 +23,12 @@
     <color name="chart_mag_z">#CE93D8</color>
     <color name="chart_pressure">#FF7043</color>
     <color name="chart_height">#8D6E63</color>
+    <color name="chart_roll">#FFAB40</color>
+    <color name="chart_pitch">#FF6E40</color>
+    <color name="chart_yaw">#FFD740</color>
+    <color name="chart_sv_count">#78909C</color>
+    <color name="chart_hdop">#90A4AE</color>
+    <color name="chart_course">#5C6BC0</color>
     <color name="usb_connected">#4CAF50</color>
     <color name="usb_disconnected">#9E9E9E</color>
 </resources>

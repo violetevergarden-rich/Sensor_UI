@@ -340,6 +340,226 @@
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
+                                android:text="@string/chart_metric_roll"
+                                style="@style/TextAppearance.SensorMonitor.DataLabel" />
+
+                            <androidx.appcompat.widget.SwitchCompat
+                                android:id="@+id/switchRoll"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="@dimen/control_row_margin"
+                            android:background="@drawable/control_row_bg"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:padding="@dimen/control_row_padding">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/chart_metric_pitch"
+                                style="@style/TextAppearance.SensorMonitor.DataLabel" />
+
+                            <androidx.appcompat.widget.SwitchCompat
+                                android:id="@+id/switchPitch"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="@dimen/control_row_margin"
+                            android:background="@drawable/control_row_bg"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:padding="@dimen/control_row_padding">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/chart_metric_yaw"
+                                style="@style/TextAppearance.SensorMonitor.DataLabel" />
+
+                            <androidx.appcompat.widget.SwitchCompat
+                                android:id="@+id/switchYaw"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="@dimen/control_row_margin"
+                            android:background="@drawable/control_row_bg"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:padding="@dimen/control_row_padding">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/chart_metric_mag_x"
+                                style="@style/TextAppearance.SensorMonitor.DataLabel" />
+
+                            <androidx.appcompat.widget.SwitchCompat
+                                android:id="@+id/switchMagX"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="@dimen/control_row_margin"
+                            android:background="@drawable/control_row_bg"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:padding="@dimen/control_row_padding">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/chart_metric_mag_y"
+                                style="@style/TextAppearance.SensorMonitor.DataLabel" />
+
+                            <androidx.appcompat.widget.SwitchCompat
+                                android:id="@+id/switchMagY"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="@dimen/control_row_margin"
+                            android:background="@drawable/control_row_bg"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:padding="@dimen/control_row_padding">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/chart_metric_mag_z"
+                                style="@style/TextAppearance.SensorMonitor.DataLabel" />
+
+                            <androidx.appcompat.widget.SwitchCompat
+                                android:id="@+id/switchMagZ"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="@dimen/control_row_margin"
+                            android:background="@drawable/control_row_bg"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:padding="@dimen/control_row_padding">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/chart_metric_pressure"
+                                style="@style/TextAppearance.SensorMonitor.DataLabel" />
+
+                            <androidx.appcompat.widget.SwitchCompat
+                                android:id="@+id/switchPressure"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="@dimen/control_row_margin"
+                            android:background="@drawable/control_row_bg"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:padding="@dimen/control_row_padding">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/chart_metric_height"
+                                style="@style/TextAppearance.SensorMonitor.DataLabel" />
+
+                            <androidx.appcompat.widget.SwitchCompat
+                                android:id="@+id/switchHeight"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="@dimen/control_row_margin"
+                            android:background="@drawable/control_row_bg"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:padding="@dimen/control_row_padding">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/chart_metric_sv_count"
+                                style="@style/TextAppearance.SensorMonitor.DataLabel" />
+
+                            <androidx.appcompat.widget.SwitchCompat
+                                android:id="@+id/switchSvCount"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="@dimen/control_row_margin"
+                            android:background="@drawable/control_row_bg"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:padding="@dimen/control_row_padding">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/chart_metric_hdop"
+                                style="@style/TextAppearance.SensorMonitor.DataLabel" />
+
+                            <androidx.appcompat.widget.SwitchCompat
+                                android:id="@+id/switchHdop"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="@dimen/control_row_margin"
+                            android:background="@drawable/control_row_bg"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:padding="@dimen/control_row_padding">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
                                 android:text="@string/table_visibility_label"
                                 style="@style/TextAppearance.SensorMonitor.DataLabel" />
 
@@ -390,14 +610,14 @@
                 android:id="@+id/lineChart"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="3" />
+                android:layout_weight="1" />
 
             <LinearLayout
                 android:id="@+id/dataPanel"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_marginTop="8dp"
-                android:layout_weight="2"
+                android:layout_weight="1"
                 android:background="@color/panel_soft"
                 android:orientation="vertical"
                 android:padding="@dimen/data_panel_padding">
@@ -524,10 +744,161 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
+                            android:text="@string/label_accel_x"
+                            style="@style/TextAppearance.SensorMonitor.DataLabel" />
+                        <TextView
+                            android:id="@+id/tvAccelX"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="6dp"
+                            android:text="--"
+                            style="@style/TextAppearance.SensorMonitor.DataValue" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:layout_margin="@dimen/data_card_margin"
+                        android:background="@color/panel_mid"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:padding="@dimen/data_card_padding">
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/label_accel_y"
+                            style="@style/TextAppearance.SensorMonitor.DataLabel" />
+                        <TextView
+                            android:id="@+id/tvAccelY"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="6dp"
+                            android:text="--"
+                            style="@style/TextAppearance.SensorMonitor.DataValue" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:layout_margin="@dimen/data_card_margin"
+                        android:background="@color/panel_mid"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:padding="@dimen/data_card_padding">
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/label_accel_z"
+                            style="@style/TextAppearance.SensorMonitor.DataLabel" />
+                        <TextView
+                            android:id="@+id/tvAccelZ"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="6dp"
+                            android:text="--"
+                            style="@style/TextAppearance.SensorMonitor.DataValue" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:layout_margin="@dimen/data_card_margin"
+                        android:background="@color/panel_mid"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:padding="@dimen/data_card_padding">
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
                             android:text="@string/label_accel_mag"
                             style="@style/TextAppearance.SensorMonitor.DataLabel" />
                         <TextView
                             android:id="@+id/tvAccelMag"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="6dp"
+                            android:text="--"
+                            style="@style/TextAppearance.SensorMonitor.DataValue" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:layout_margin="@dimen/data_card_margin"
+                        android:background="@color/panel_mid"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:padding="@dimen/data_card_padding">
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/label_gyro_x"
+                            style="@style/TextAppearance.SensorMonitor.DataLabel" />
+                        <TextView
+                            android:id="@+id/tvGyroX"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="6dp"
+                            android:text="--"
+                            style="@style/TextAppearance.SensorMonitor.DataValue" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:layout_margin="@dimen/data_card_margin"
+                        android:background="@color/panel_mid"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:padding="@dimen/data_card_padding">
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/label_gyro_y"
+                            style="@style/TextAppearance.SensorMonitor.DataLabel" />
+                        <TextView
+                            android:id="@+id/tvGyroY"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="6dp"
+                            android:text="--"
+                            style="@style/TextAppearance.SensorMonitor.DataValue" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:layout_margin="@dimen/data_card_margin"
+                        android:background="@color/panel_mid"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:padding="@dimen/data_card_padding">
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/label_gyro_z"
+                            style="@style/TextAppearance.SensorMonitor.DataLabel" />
+                        <TextView
+                            android:id="@+id/tvGyroZ"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="6dp"
@@ -558,6 +929,13 @@
                             android:text="--"
                             style="@style/TextAppearance.SensorMonitor.DataValue" />
                     </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:orientation="horizontal">
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -572,10 +950,10 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="@string/label_yaw"
+                            android:text="@string/label_roll"
                             style="@style/TextAppearance.SensorMonitor.DataLabel" />
                         <TextView
-                            android:id="@+id/tvYaw"
+                            android:id="@+id/tvRoll"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="6dp"
@@ -620,10 +998,34 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="@string/label_roll"
+                            android:text="@string/label_yaw"
                             style="@style/TextAppearance.SensorMonitor.DataLabel" />
                         <TextView
-                            android:id="@+id/tvRoll"
+                            android:id="@+id/tvYaw"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="6dp"
+                            android:text="--"
+                            style="@style/TextAppearance.SensorMonitor.DataValue" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:layout_margin="@dimen/data_card_margin"
+                        android:background="@color/panel_mid"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:padding="@dimen/data_card_padding">
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/label_course"
+                            style="@style/TextAppearance.SensorMonitor.DataLabel" />
+                        <TextView
+                            android:id="@+id/tvCourse"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="6dp"
@@ -826,10 +1228,10 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="@string/label_gps_fix"
+                            android:text="@string/label_pdop"
                             style="@style/TextAppearance.SensorMonitor.DataLabel" />
                         <TextView
-                            android:id="@+id/tvGpsFix"
+                            android:id="@+id/tvPdop"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="6dp"

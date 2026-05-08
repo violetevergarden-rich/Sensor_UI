@@ -105,7 +105,17 @@ class MainActivity : AppCompatActivity(), SensorEventListener, SettingsDialogFra
         GYRO_X(R.string.chart_metric_gyro_x, R.color.chart_gyro_x),
         GYRO_Y(R.string.chart_metric_gyro_y, R.color.chart_gyro_y),
         GYRO_Z(R.string.chart_metric_gyro_z, R.color.chart_gyro_z),
-        SPEED(R.string.chart_metric_speed, R.color.chart_speed)
+        SPEED(R.string.chart_metric_speed, R.color.chart_speed),
+        ROLL(R.string.chart_metric_roll, R.color.chart_roll),
+        PITCH(R.string.chart_metric_pitch, R.color.chart_pitch),
+        YAW(R.string.chart_metric_yaw, R.color.chart_yaw),
+        MAG_X(R.string.chart_metric_mag_x, R.color.chart_mag_x),
+        MAG_Y(R.string.chart_metric_mag_y, R.color.chart_mag_y),
+        MAG_Z(R.string.chart_metric_mag_z, R.color.chart_mag_z),
+        PRESSURE(R.string.chart_metric_pressure, R.color.chart_pressure),
+        HEIGHT(R.string.chart_metric_height, R.color.chart_height),
+        SV_COUNT(R.string.chart_metric_sv_count, R.color.chart_sv_count),
+        HDOP(R.string.chart_metric_hdop, R.color.chart_hdop),
     }
 
     private lateinit var binding: ActivityMainBinding
@@ -179,6 +189,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener, SettingsDialogFra
     private var extHdop = 0f
     private var extPdop = 0f
     private var extVdop = 0f
+    private var course = 0f
+    private var fixQuality = 0
 
     private var uploadSuccessCount = 0
     private var uploadFailCount = 0
@@ -291,11 +303,12 @@ class MainActivity : AppCompatActivity(), SensorEventListener, SettingsDialogFra
             data.longitude?.let { longitude = it }
             data.altitude?.let { altitude = it }
             data.speed?.let { gpsSpeed = it }
+            data.course?.let { course = it }
+            data.fixQuality?.let { fixQuality = it }
         }
     }
 
     private fun onImuFrameData(data: ImuFrameData) {
-        Log.d(TAG, "onImuFrameData: accelX=${data.accelX}, gyroX=${data.gyroX}, magX=${data.magX}, roll=${data.roll}")
         synchronized(lock) {
             data.accelX?.let { accelX = it }
             data.accelY?.let { accelY = it }
@@ -383,6 +396,16 @@ class MainActivity : AppCompatActivity(), SensorEventListener, SettingsDialogFra
         bindSeriesSwitch(binding.switchGyroY, ChartMetric.GYRO_Y, false)
         bindSeriesSwitch(binding.switchGyroZ, ChartMetric.GYRO_Z, false)
         bindSeriesSwitch(binding.switchSpeed, ChartMetric.SPEED, true)
+        bindSeriesSwitch(binding.switchRoll, ChartMetric.ROLL, false)
+        bindSeriesSwitch(binding.switchPitch, ChartMetric.PITCH, false)
+        bindSeriesSwitch(binding.switchYaw, ChartMetric.YAW, false)
+        bindSeriesSwitch(binding.switchMagX, ChartMetric.MAG_X, false)
+        bindSeriesSwitch(binding.switchMagY, ChartMetric.MAG_Y, false)
+        bindSeriesSwitch(binding.switchMagZ, ChartMetric.MAG_Z, false)
+        bindSeriesSwitch(binding.switchPressure, ChartMetric.PRESSURE, false)
+        bindSeriesSwitch(binding.switchHeight, ChartMetric.HEIGHT, false)
+        bindSeriesSwitch(binding.switchSvCount, ChartMetric.SV_COUNT, false)
+        bindSeriesSwitch(binding.switchHdop, ChartMetric.HDOP, false)
 
         binding.switchTable.setOnCheckedChangeListener(null)
         binding.switchTable.isChecked = true
@@ -434,11 +457,18 @@ class MainActivity : AppCompatActivity(), SensorEventListener, SettingsDialogFra
                     binding.tvLon.text = state.longitude?.let { "%.6f".format(it) } ?: "--"
                     binding.tvAltitude.text = formatAltitude(state.altitude)
                     binding.tvSpeed.text = formatSpeed(state.speed)
+                    binding.tvAccelX.text = "%.3f".format(state.accelX)
+                    binding.tvAccelY.text = "%.3f".format(state.accelY)
+                    binding.tvAccelZ.text = "%.3f".format(state.accelZ)
                     binding.tvAccelMag.text = "%.3f".format(sqrt(state.accelX * state.accelX + state.accelY * state.accelY + state.accelZ * state.accelZ))
+                    binding.tvGyroX.text = "%.3f".format(state.gyroX)
+                    binding.tvGyroY.text = "%.3f".format(state.gyroY)
+                    binding.tvGyroZ.text = "%.3f".format(state.gyroZ)
                     binding.tvGyroMag.text = "%.3f".format(sqrt(state.gyroX * state.gyroX + state.gyroY * state.gyroY + state.gyroZ * state.gyroZ))
-                    binding.tvYaw.text = "%.1f°".format(state.yaw)
-                    binding.tvPitch.text = "%.1f°".format(state.pitch)
                     binding.tvRoll.text = "%.1f°".format(state.roll)
+                    binding.tvPitch.text = "%.1f°".format(state.pitch)
+                    binding.tvYaw.text = "%.1f°".format(state.yaw)
+                    binding.tvCourse.text = if (state.course > 0f) "%.1f°".format(state.course) else "--"
 
                     binding.tvUsbStatus.text = when {
                         state.usbGpsConnected && state.usbImuConnected -> "USB: GPS+IMU"
@@ -460,7 +490,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener, SettingsDialogFra
                     binding.tvHeight.text = if (state.height > 0f) "%.1f m".format(state.height) else "--"
                     binding.tvSvCount.text = if (state.svCount > 0) "${state.svCount}" else "--"
                     binding.tvHdop.text = if (state.hdop > 0f) "%.1f".format(state.hdop) else "--"
-                    binding.tvGpsFix.text = if (state.usbGpsConnected && state.latitude != null) "3D Fix" else "--"
+                    binding.tvPdop.text = if (state.pdop > 0f) "%.1f".format(state.pdop) else "--"
 
                     if (state.isRunning) {
                         appendChartPoints(state)
@@ -531,6 +561,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener, SettingsDialogFra
                         pdop = extPdop,
                         hdop = extHdop,
                         vdop = extVdop,
+                        course = course,
+                        fixQuality = fixQuality,
                     )
                 }
                 uiState.value = snapshot
@@ -591,6 +623,16 @@ class MainActivity : AppCompatActivity(), SensorEventListener, SettingsDialogFra
             ChartMetric.GYRO_Y -> state.gyroY
             ChartMetric.GYRO_Z -> state.gyroZ
             ChartMetric.SPEED -> state.speed
+            ChartMetric.ROLL -> state.roll
+            ChartMetric.PITCH -> state.pitch
+            ChartMetric.YAW -> state.yaw
+            ChartMetric.MAG_X -> state.magX
+            ChartMetric.MAG_Y -> state.magY
+            ChartMetric.MAG_Z -> state.magZ
+            ChartMetric.PRESSURE -> state.pressure / 100f
+            ChartMetric.HEIGHT -> state.height
+            ChartMetric.SV_COUNT -> state.svCount.toFloat()
+            ChartMetric.HDOP -> state.hdop
         }
     }
 

@@ -21,6 +21,17 @@
     <string name="chart_metric_gyro_y">角速度 Y</string>
     <string name="chart_metric_gyro_z">角速度 Z</string>
     <string name="chart_metric_speed">速度</string>
+    <string name="chart_metric_roll">翻滚角</string>
+    <string name="chart_metric_pitch">俯仰角</string>
+    <string name="chart_metric_yaw">方位角</string>
+    <string name="chart_metric_mag_x">磁力 X</string>
+    <string name="chart_metric_mag_y">磁力 Y</string>
+    <string name="chart_metric_mag_z">磁力 Z</string>
+    <string name="chart_metric_pressure">气压</string>
+    <string name="chart_metric_height">气压高度</string>
+    <string name="chart_metric_sv_count">卫星数</string>
+    <string name="chart_metric_course">航向</string>
+    <string name="chart_metric_hdop">HDOP</string>
     <string name="table_visibility_label">显示下方表格</string>
 
     <string name="sensor_accel">加速度</string>
@@ -92,6 +103,7 @@
     <string name="status_usb_gps_ok">GPS</string>
     <string name="status_usb_imu_ok">IMU</string>
 
+    <string name="label_course">航向</string>
     <string name="label_pdop">PDOP</string>
     <string name="label_vdop">VDOP</string>
     <string name="settings_upload_enabled">启用数据库上传</string>

@@ -31,4 +31,6 @@ data class SensorUiState(
     val pdop: Float = 0f,
     val hdop: Float = 0f,
     val vdop: Float = 0f,
+    val course: Float = 0f,
+    val fixQuality: Int = 0,
 )
