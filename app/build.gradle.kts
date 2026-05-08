@@ -48,7 +48,6 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.play.services.location)
     implementation(libs.mpandroidchart)
-    implementation(libs.mysql.connector)
     implementation(libs.usb.serial)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

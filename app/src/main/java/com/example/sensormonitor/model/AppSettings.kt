@@ -26,5 +26,7 @@ data class AppSettings(
     val altitudeUnit: AltitudeUnit = AltitudeUnit.METER,
     val smoothingEnabled: Boolean = false,
     val smoothingAlpha: Float = 0.85f,
-    val uiRefreshRate: UiRefreshRate = UiRefreshRate.HZ_10
+    val uiRefreshRate: UiRefreshRate = UiRefreshRate.HZ_10,
+    val uploadEnabled: Boolean = false,
+    val serverUrl: String = "http://47.104.147.148:18080/measurements",
 )

@@ -28,5 +28,7 @@ data class SensorUiState(
     val quatY: Float = 0f,
     val quatZ: Float = 0f,
     val svCount: Int = 0,
+    val pdop: Float = 0f,
     val hdop: Float = 0f,
+    val vdop: Float = 0f,
 )

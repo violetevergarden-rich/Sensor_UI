@@ -55,6 +55,19 @@ CREATE TABLE IF NOT EXISTS `{table}` (
     roll DOUBLE,
     yaw DOUBLE,
     speed DOUBLE,
+    mag_x DOUBLE,
+    mag_y DOUBLE,
+    mag_z DOUBLE,
+    pressure DOUBLE,
+    height DOUBLE,
+    quat_w DOUBLE,
+    quat_x DOUBLE,
+    quat_y DOUBLE,
+    quat_z DOUBLE,
+    sv_count INT,
+    pdop DOUBLE,
+    hdop DOUBLE,
+    vdop DOUBLE,
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 """.strip()
 
@@ -132,6 +145,20 @@ def build_remote_mysql_script(database: str, table: str, password: str) -> str:
         "        ('pitch', \"ALTER TABLE `{table}` ADD COLUMN `pitch` DOUBLE NULL AFTER `gyro_z`\"),\n"
         "        ('roll', \"ALTER TABLE `{table}` ADD COLUMN `roll` DOUBLE NULL AFTER `pitch`\"),\n"
         "        ('yaw', \"ALTER TABLE `{table}` ADD COLUMN `yaw` DOUBLE NULL AFTER `roll`\"),\n"
+        "        ('speed', \"ALTER TABLE `{table}` ADD COLUMN `speed` DOUBLE NULL AFTER `yaw`\"),\n"
+        "        ('mag_x', \"ALTER TABLE `{table}` ADD COLUMN `mag_x` DOUBLE NULL AFTER `speed`\"),\n"
+        "        ('mag_y', \"ALTER TABLE `{table}` ADD COLUMN `mag_y` DOUBLE NULL AFTER `mag_x`\"),\n"
+        "        ('mag_z', \"ALTER TABLE `{table}` ADD COLUMN `mag_z` DOUBLE NULL AFTER `mag_y`\"),\n"
+        "        ('pressure', \"ALTER TABLE `{table}` ADD COLUMN `pressure` DOUBLE NULL AFTER `mag_z`\"),\n"
+        "        ('height', \"ALTER TABLE `{table}` ADD COLUMN `height` DOUBLE NULL AFTER `pressure`\"),\n"
+        "        ('quat_w', \"ALTER TABLE `{table}` ADD COLUMN `quat_w` DOUBLE NULL AFTER `height`\"),\n"
+        "        ('quat_x', \"ALTER TABLE `{table}` ADD COLUMN `quat_x` DOUBLE NULL AFTER `quat_w`\"),\n"
+        "        ('quat_y', \"ALTER TABLE `{table}` ADD COLUMN `quat_y` DOUBLE NULL AFTER `quat_x`\"),\n"
+        "        ('quat_z', \"ALTER TABLE `{table}` ADD COLUMN `quat_z` DOUBLE NULL AFTER `quat_y`\"),\n"
+        "        ('sv_count', \"ALTER TABLE `{table}` ADD COLUMN `sv_count` INT NULL AFTER `quat_z`\"),\n"
+        "        ('pdop', \"ALTER TABLE `{table}` ADD COLUMN `pdop` DOUBLE NULL AFTER `sv_count`\"),\n"
+        "        ('hdop', \"ALTER TABLE `{table}` ADD COLUMN `hdop` DOUBLE NULL AFTER `pdop`\"),\n"
+        "        ('vdop', \"ALTER TABLE `{table}` ADD COLUMN `vdop` DOUBLE NULL AFTER `hdop`\"),\n"
         "    ]\n"
         "    for column_name, statement_template in column_defs:\n"
         "        if not column_exists(cursor, database, table, column_name):\n"

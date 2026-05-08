@@ -13,12 +13,12 @@ import java.time.format.DateTimeFormatter
 object RemoteMySqlMeasurementRepository {
     private const val TAG = "RemoteMySqlRepo"
 
-    private const val INGEST_API_URL = "http://47.104.147.148/sensor-api/measurements"
+    var ingestApiUrl: String = "http://47.104.147.148:18080/measurements"
     private const val CONNECT_TIMEOUT_MS = 5000
     private const val READ_TIMEOUT_MS = 5000
     private val sqlDateTimeFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
 
-    suspend fun insertMeasurement(measurement: IotMeasurement): Result<Unit> = withContext(Dispatchers.IO) {
+    suspend fun insertMeasurement(measurement: IotMeasurement, serverUrl: String? = null): Result<Unit> = withContext(Dispatchers.IO) {
         try {
             val payload = JSONObject().apply {
                 put("record_time", measurement.recordTime.format(sqlDateTimeFormatter))
@@ -53,7 +53,7 @@ object RemoteMySqlMeasurementRepository {
                 put("vdop", measurement.vdop)
             }
 
-            val connection = URL(INGEST_API_URL).openConnection() as HttpURLConnection
+            val connection = URL(serverUrl ?: ingestApiUrl).openConnection() as HttpURLConnection
             connection.requestMethod = "POST"
             connection.connectTimeout = CONNECT_TIMEOUT_MS
             connection.readTimeout = READ_TIMEOUT_MS

@@ -66,52 +66,29 @@ class MeasurementHandler(BaseHTTPRequestHandler):
                 self._send_json(400, {"ok": False, "error": f"missing field: {field}"})
                 return
 
-        sql = f"""
-            INSERT INTO {TABLE_NAME} (
-                record_time,
-                device_id,
-                device_name,
-                path_id,
-                latitude,
-                longitude,
-                altitude,
-                accel_x,
-                accel_y,
-                accel_z,
-                gyro_x,
-                gyro_y,
-                gyro_z,
-                pitch,
-                roll,
-                yaw,
-                speed
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-        """
+        ALL_FIELDS = [
+            "record_time", "device_id", "device_name", "path_id",
+            "latitude", "longitude", "altitude",
+            "accel_x", "accel_y", "accel_z",
+            "gyro_x", "gyro_y", "gyro_z",
+            "pitch", "roll", "yaw", "speed",
+            "mag_x", "mag_y", "mag_z",
+            "pressure", "height",
+            "quat_w", "quat_x", "quat_y", "quat_z",
+            "sv_count", "pdop", "hdop", "vdop",
+        ]
+
+        columns = ", ".join(ALL_FIELDS)
+        placeholders = ", ".join(["%s"] * len(ALL_FIELDS))
+        sql = f"INSERT INTO {TABLE_NAME} ({columns}) VALUES ({placeholders})"
+        params = [payload.get(f) for f in ALL_FIELDS]
 
         try:
             conn = get_connection()
             with conn.cursor() as cursor:
                 cursor.execute(f"CREATE DATABASE IF NOT EXISTS `{DB_NAME}` CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci")
                 cursor.execute(f"USE `{DB_NAME}`")
-                cursor.execute(sql, (
-                    payload.get("record_time"),
-                    payload.get("device_id"),
-                    payload.get("device_name"),
-                    payload.get("path_id"),
-                    payload.get("latitude"),
-                    payload.get("longitude"),
-                    payload.get("altitude"),
-                    payload.get("accel_x"),
-                    payload.get("accel_y"),
-                    payload.get("accel_z"),
-                    payload.get("gyro_x"),
-                    payload.get("gyro_y"),
-                    payload.get("gyro_z"),
-                    payload.get("pitch"),
-                    payload.get("roll"),
-                    payload.get("yaw"),
-                    payload.get("speed"),
-                ))
+                cursor.execute(sql, params)
                 inserted_id = cursor.lastrowid
             conn.close()
         except Exception as exc:

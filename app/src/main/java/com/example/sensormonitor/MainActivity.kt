@@ -87,6 +87,9 @@ class MainActivity : AppCompatActivity(), SensorEventListener, SettingsDialogFra
         private const val KEY_SMOOTHING_ENABLED = "smoothing_enabled"
         private const val KEY_SMOOTHING_ALPHA = "smoothing_alpha"
         private const val KEY_UI_REFRESH_RATE = "ui_refresh_rate"
+        private const val KEY_UPLOAD_ENABLED = "upload_enabled"
+        private const val KEY_SERVER_URL = "server_url"
+        private const val DEFAULT_SERVER_URL = "http://47.104.147.148:18080/measurements"
     }
 
     private enum class ChartMetric(
@@ -174,6 +177,11 @@ class MainActivity : AppCompatActivity(), SensorEventListener, SettingsDialogFra
     private var quatZ = 0f
     private var extSvCount = 0
     private var extHdop = 0f
+    private var extPdop = 0f
+    private var extVdop = 0f
+
+    private var uploadSuccessCount = 0
+    private var uploadFailCount = 0
 
     private val uiState = kotlinx.coroutines.flow.MutableStateFlow(SensorUiState())
 
@@ -287,6 +295,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener, SettingsDialogFra
     }
 
     private fun onImuFrameData(data: ImuFrameData) {
+        Log.d(TAG, "onImuFrameData: accelX=${data.accelX}, gyroX=${data.gyroX}, magX=${data.magX}, roll=${data.roll}")
         synchronized(lock) {
             data.accelX?.let { accelX = it }
             data.accelY?.let { accelY = it }
@@ -308,6 +317,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener, SettingsDialogFra
             data.quatZ?.let { quatZ = it }
             data.svCount?.let { extSvCount = it }
             data.hdop?.let { extHdop = it }
+            data.pdop?.let { extPdop = it }
+            data.vdop?.let { extVdop = it }
         }
     }
 
@@ -517,7 +528,9 @@ class MainActivity : AppCompatActivity(), SensorEventListener, SettingsDialogFra
                         quatY = quatY,
                         quatZ = quatZ,
                         svCount = extSvCount,
+                        pdop = extPdop,
                         hdop = extHdop,
+                        vdop = extVdop,
                     )
                 }
                 uiState.value = snapshot
@@ -535,6 +548,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener, SettingsDialogFra
         uiTickerJob?.cancel()
         uiTickerJob = null
         stopMeasurementLogging()
+        uploadSuccessCount = 0
+        uploadFailCount = 0
         applyRuntimeSettings()
 
         uiState.value = uiState.value.copy(isRunning = false, statusText = getString(R.string.status_idle))
@@ -759,7 +774,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener, SettingsDialogFra
                 val file = File(dir, fileName)
                 BufferedWriter(FileWriter(file, false))
             }
-            writer.write("timestamp,path_id,lat,lon,altitude,speed,accel_x,accel_y,accel_z,gyro_x,gyro_y,gyro_z,pitch,roll,yaw,mag_x,mag_y,mag_z,pressure,height,quat_w,quat_x,quat_y,quat_z,sv_count,hdop")
+            writer.write("timestamp,path_id,lat,lon,altitude,speed,accel_x,accel_y,accel_z,gyro_x,gyro_y,gyro_z,pitch,roll,yaw,mag_x,mag_y,mag_z,pressure,height,quat_w,quat_x,quat_y,quat_z,sv_count,pdop,hdop,vdop")
             writer.newLine()
             writer.flush()
             writer
@@ -779,7 +794,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener, SettingsDialogFra
                 AltitudeUnit.METER -> altitude
                 AltitudeUnit.FEET -> altitude?.times(3.28084)
             }
-            val row = "${System.currentTimeMillis()},$currentPathId,${latitude ?: ""},${longitude ?: ""},${altitudeValue ?: ""},$speedText,$accelX,$accelY,$accelZ,$gyroX,$gyroY,$gyroZ,$pitch,$roll,$yaw,$magX,$magY,$magZ,$pressure,$height,$quatW,$quatX,$quatY,$quatZ,$extSvCount,$extHdop"
+            val row = "${System.currentTimeMillis()},$currentPathId,${latitude ?: ""},${longitude ?: ""},${altitudeValue ?: ""},$speedText,$accelX,$accelY,$accelZ,$gyroX,$gyroY,$gyroZ,$pitch,$roll,$yaw,$magX,$magY,$magZ,$pressure,$height,$quatW,$quatX,$quatY,$quatZ,$extSvCount,$extPdop,$extHdop,$extVdop"
             val measurement = IotMeasurement(
                 recordTime = LocalDateTime.now(),
                 deviceId = deviceId,
@@ -808,7 +823,9 @@ class MainActivity : AppCompatActivity(), SensorEventListener, SettingsDialogFra
                 quatY = quatY.toDouble(),
                 quatZ = quatZ.toDouble(),
                 svCount = extSvCount,
+                pdop = extPdop.toDouble(),
                 hdop = extHdop.toDouble(),
+                vdop = extVdop.toDouble(),
             )
             row to measurement
         }
@@ -826,11 +843,20 @@ class MainActivity : AppCompatActivity(), SensorEventListener, SettingsDialogFra
     }
 
     private fun uploadMeasurementToRemote(measurement: IotMeasurement) {
+        if (!appSettings.uploadEnabled) return
         lifecycleScope.launch {
-            val result = RemoteMySqlMeasurementRepository.insertMeasurement(measurement)
-            if (result.isFailure) {
+            val result = RemoteMySqlMeasurementRepository.insertMeasurement(measurement, appSettings.serverUrl)
+            if (result.isSuccess) {
+                uploadSuccessCount++
+                uiState.value = uiState.value.copy(
+                    statusText = getString(R.string.status_upload_ok, uploadSuccessCount)
+                )
+            } else {
+                uploadFailCount++
                 Log.e(TAG, "uploadMeasurementToRemote failed", result.exceptionOrNull())
-                uiState.value = uiState.value.copy(statusText = getString(R.string.status_csv_error))
+                uiState.value = uiState.value.copy(
+                    statusText = getString(R.string.status_upload_error, uploadFailCount)
+                )
             }
         }
     }
@@ -858,7 +884,9 @@ class MainActivity : AppCompatActivity(), SensorEventListener, SettingsDialogFra
             altitudeUnit = AltitudeUnit.valueOf(sp.getString(KEY_ALTITUDE_UNIT, AltitudeUnit.METER.name) ?: AltitudeUnit.METER.name),
             smoothingEnabled = sp.getBoolean(KEY_SMOOTHING_ENABLED, false),
             smoothingAlpha = sp.getFloat(KEY_SMOOTHING_ALPHA, 0.85f),
-            uiRefreshRate = UiRefreshRate.valueOf(sp.getString(KEY_UI_REFRESH_RATE, UiRefreshRate.HZ_10.name) ?: UiRefreshRate.HZ_10.name)
+            uiRefreshRate = UiRefreshRate.valueOf(sp.getString(KEY_UI_REFRESH_RATE, UiRefreshRate.HZ_10.name) ?: UiRefreshRate.HZ_10.name),
+            uploadEnabled = sp.getBoolean(KEY_UPLOAD_ENABLED, false),
+            serverUrl = sp.getString(KEY_SERVER_URL, DEFAULT_SERVER_URL) ?: DEFAULT_SERVER_URL,
         )
     }
 
@@ -875,6 +903,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener, SettingsDialogFra
             .putBoolean(KEY_SMOOTHING_ENABLED, settings.smoothingEnabled)
             .putFloat(KEY_SMOOTHING_ALPHA, settings.smoothingAlpha)
             .putString(KEY_UI_REFRESH_RATE, settings.uiRefreshRate.name)
+            .putBoolean(KEY_UPLOAD_ENABLED, settings.uploadEnabled)
+            .putString(KEY_SERVER_URL, settings.serverUrl)
             .apply()
     }
 

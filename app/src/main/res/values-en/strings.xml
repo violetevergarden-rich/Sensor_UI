@@ -62,4 +62,24 @@
     <string name="settings_language_english">Switch to English UI</string>
     <string name="settings_apply">Apply</string>
     <string name="settings_cancel">Cancel</string>
+
+    <string name="label_mag_x">Mag X</string>
+    <string name="label_mag_y">Mag Y</string>
+    <string name="label_mag_z">Mag Z</string>
+    <string name="label_pressure">Pressure</string>
+    <string name="label_height">Height</string>
+    <string name="label_gps_fix">GPS Fix</string>
+    <string name="label_sv_count">SV Count</string>
+    <string name="label_hdop">HDOP</string>
+    <string name="label_pdop">PDOP</string>
+    <string name="label_vdop">VDOP</string>
+    <string name="status_usb_disconnected">USB Disconnected</string>
+    <string name="status_usb_gps_ok">GPS</string>
+    <string name="status_usb_imu_ok">IMU</string>
+    <string name="settings_upload_enabled">Enable DB Upload</string>
+    <string name="settings_server_url">Server URL</string>
+    <string name="settings_server_url_hint">http://47.104.147.148:18080/measurements</string>
+    <string name="settings_server_url_default">http://47.104.147.148:18080/measurements</string>
+    <string name="status_upload_ok">Upload OK (%d)</string>
+    <string name="status_upload_error">Upload failed (%d)</string>
 </resources>

@@ -83,6 +83,17 @@ class SettingsDialogFragment : DialogFragment() {
             isChecked = (arguments?.getString(ARG_LANGUAGE_CODE) ?: "zh") == "en"
         }
 
+        val uploadSwitch = SwitchCompat(context).apply {
+            text = getString(R.string.settings_upload_enabled)
+            isChecked = arguments?.getBoolean(ARG_UPLOAD_ENABLED) ?: false
+        }
+
+        val serverUrlInput = EditText(requireContext()).apply {
+            inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_URI
+            hint = getString(R.string.settings_server_url_hint)
+            setText(arguments?.getString(ARG_SERVER_URL) ?: getString(R.string.settings_server_url_default))
+        }
+
         val content = LinearLayout(context).apply {
             orientation = LinearLayout.VERTICAL
             val padding = resources.getDimensionPixelSize(R.dimen.settings_dialog_padding)
@@ -108,6 +119,10 @@ class SettingsDialogFragment : DialogFragment() {
 
             addView(refreshRateSwitch)
             addView(languageSwitch)
+
+            addView(uploadSwitch)
+            addView(TextView(context).apply { text = getString(R.string.settings_server_url) })
+            addView(serverUrlInput)
         }
 
         val container = ScrollView(context).apply {
@@ -138,7 +153,9 @@ class SettingsDialogFragment : DialogFragment() {
                     altitudeUnit = if (altitudeUnitSwitch.isChecked) AltitudeUnit.FEET else AltitudeUnit.METER,
                     smoothingEnabled = smoothingSwitch.isChecked,
                     smoothingAlpha = alpha,
-                    uiRefreshRate = if (refreshRateSwitch.isChecked) UiRefreshRate.HZ_30 else UiRefreshRate.HZ_10
+                    uiRefreshRate = if (refreshRateSwitch.isChecked) UiRefreshRate.HZ_30 else UiRefreshRate.HZ_10,
+                    uploadEnabled = uploadSwitch.isChecked,
+                    serverUrl = serverUrlInput.text.toString().ifBlank { getString(R.string.settings_server_url_default) },
                 )
                 (activity as? Listener)?.onSettingsUpdated(settings)
             }
@@ -158,6 +175,8 @@ class SettingsDialogFragment : DialogFragment() {
         private const val ARG_SMOOTHING_ENABLED = "arg_smoothing_enabled"
         private const val ARG_ALPHA = "arg_alpha"
         private const val ARG_REFRESH_RATE = "arg_refresh_rate"
+        private const val ARG_UPLOAD_ENABLED = "arg_upload_enabled"
+        private const val ARG_SERVER_URL = "arg_server_url"
 
         fun newInstance(settings: AppSettings): SettingsDialogFragment {
             val fragment = SettingsDialogFragment()
@@ -173,6 +192,8 @@ class SettingsDialogFragment : DialogFragment() {
                 putBoolean(ARG_SMOOTHING_ENABLED, settings.smoothingEnabled)
                 putFloat(ARG_ALPHA, settings.smoothingAlpha)
                 putString(ARG_REFRESH_RATE, settings.uiRefreshRate.name)
+                putBoolean(ARG_UPLOAD_ENABLED, settings.uploadEnabled)
+                putString(ARG_SERVER_URL, settings.serverUrl)
             }
             return fragment
         }

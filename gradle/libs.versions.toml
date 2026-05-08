@@ -13,7 +13,6 @@ lifecycleRuntimeKtx = "2.8.7"
 coroutines = "1.9.0"
 playServicesLocation = "21.3.0"
 mpandroidchart = "v3.1.0"
-mysqlConnector = "8.4.0"
 usbSerial = "3.7.3"
 
 [libraries]
@@ -29,7 +28,6 @@ androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecyc
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
 play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
 mpandroidchart = { group = "com.github.PhilJay", name = "MPAndroidChart", version.ref = "mpandroidchart" }
-mysql-connector = { group = "com.mysql", name = "mysql-connector-j", version.ref = "mysqlConnector" }
 usb-serial = { group = "com.github.mik3y", name = "usb-serial-for-android", version.ref = "usbSerial" }
 
 [plugins]

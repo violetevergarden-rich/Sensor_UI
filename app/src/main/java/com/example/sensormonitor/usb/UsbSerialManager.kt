@@ -146,36 +146,46 @@ class UsbSerialManager(
         val deviceName = device.deviceName
         Log.d(TAG, "connectDevice: name=$deviceName")
 
-        // Determine role: re-match by known device name, or assign first available slot
-        val role = when {
-            deviceName == gpsDeviceName -> "gps"
-            deviceName == imuDeviceName -> "imu"
-            !gpsConnected -> "gps"
-            !imuConnected -> "imu"
-            else -> {
-                Log.d(TAG, "connectDevice: both slots occupied, ignoring $deviceName")
-                return
-            }
+        // Reconnect: if we already know this device, skip sniffing
+        val knownRole = when (deviceName) {
+            gpsDeviceName -> "gps"
+            imuDeviceName -> "imu"
+            else -> null
         }
 
-        openDevicePort(device, deviceName, role)
+        // If both slots occupied by different devices, ignore
+        if (knownRole == null && gpsConnected && imuConnected) {
+            Log.d(TAG, "connectDevice: both slots occupied, ignoring $deviceName")
+            return
+        }
+
+        openDevicePort(device, deviceName, knownRole)
     }
 
-    private fun openDevicePort(device: UsbDevice, deviceName: String, role: String) {
+    private fun openDevicePort(device: UsbDevice, deviceName: String, knownRole: String?) {
         val driver = UsbSerialProber.getDefaultProber().probeDevice(device)
         if (driver == null || driver.ports.isEmpty()) {
-            Log.e(TAG, "openDevicePort: no driver for $role ($deviceName)")
+            Log.e(TAG, "openDevicePort: no driver ($deviceName)")
             return
         }
         val port = driver.ports[0]
         val connection = usbManager.openDevice(device)
         if (connection == null) {
-            Log.e(TAG, "openDevicePort: failed to open $role ($deviceName)")
+            Log.e(TAG, "openDevicePort: failed to open ($deviceName)")
             return
         }
         try {
             port.open(connection)
             port.setParameters(BAUD_RATE, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE)
+
+            // Auto-detect role by sniffing data
+            val role = knownRole ?: detectDeviceRole(port, deviceName)
+            if (role == null) {
+                Log.d(TAG, "openDevicePort: could not detect role, closing ($deviceName)")
+                port.close()
+                return
+            }
+
             when (role) {
                 "gps" -> {
                     gpsPort = port
@@ -195,8 +205,47 @@ class UsbSerialManager(
                 }
             }
         } catch (e: Exception) {
-            Log.e(TAG, "openDevicePort: $role port open failed", e)
+            Log.e(TAG, "openDevicePort: port open failed ($deviceName)", e)
             try { port.close() } catch (_: Exception) {}
+        }
+    }
+
+    private fun detectDeviceRole(port: UsbSerialPort, deviceName: String): String? {
+        val sniff = ByteArray(64)
+        val len = try {
+            port.read(sniff, 500)
+        } catch (e: Exception) {
+            Log.e(TAG, "detectDeviceRole: read failed for $deviceName", e)
+            -1
+        }
+        if (len <= 0) {
+            Log.d(TAG, "detectDeviceRole: no data from $deviceName, using fallback")
+            // Fallback: first-come, first-serve
+            return when {
+                !gpsConnected -> "gps"
+                !imuConnected -> "imu"
+                else -> null
+            }
+        }
+        // Scan for NMEA header ($) or IMU header (0x55)
+        for (i in 0 until len) {
+            val b = sniff[i].toInt() and 0xFF
+            when (b) {
+                0x24 -> { // '$' = NMEA GPS
+                    Log.d(TAG, "detectDeviceRole: $deviceName → GPS (NMEA)")
+                    return "gps"
+                }
+                0x55 -> { // IMU binary frame header
+                    Log.d(TAG, "detectDeviceRole: $deviceName → IMU (binary)")
+                    return "imu"
+                }
+            }
+        }
+        Log.d(TAG, "detectDeviceRole: couldn't determine role from $len bytes, using fallback for $deviceName")
+        return when {
+            !gpsConnected -> "gps"
+            !imuConnected -> "imu"
+            else -> null
         }
     }
 
@@ -227,6 +276,7 @@ class UsbSerialManager(
                             if (line.startsWith("$")) {
                                 val data = gpsParser.parse(line)
                                 if (data != null) {
+                                    Log.d(TAG, "GPS parsed: lat=${data.latitude}, lon=${data.longitude}")
                                     onGpsData(data)
                                 }
                             }
@@ -256,6 +306,13 @@ class UsbSerialManager(
                     if (len < 0) break
                     if (len > 0) {
                         val frames = imuParser.feed(buffer.copyOf(len))
+                        if (frames.isNotEmpty()) {
+                            val acc = frames.find { it.accelX != null }
+                            val gyr = frames.find { it.gyroX != null }
+                            val mag = frames.find { it.magX != null }
+                            val ang = frames.find { it.roll != null }
+                            Log.d(TAG, "IMU frames: ${frames.size} | acc=${acc?.accelX} gyro=${gyr?.gyroX} mag=${mag?.magX} roll=${ang?.roll}")
+                        }
                         for (frame in frames) {
                             onImuData(frame)
                         }
