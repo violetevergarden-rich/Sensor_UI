@@ -79,4 +79,16 @@
     <string name="settings_language_english">切换为英文界面</string>
     <string name="settings_apply">应用</string>
     <string name="settings_cancel">取消</string>
+
+    <string name="label_mag_x">磁力 X</string>
+    <string name="label_mag_y">磁力 Y</string>
+    <string name="label_mag_z">磁力 Z</string>
+    <string name="label_pressure">气压</string>
+    <string name="label_height">气压高度</string>
+    <string name="label_gps_fix">GPS 状态</string>
+    <string name="label_sv_count">卫星数</string>
+    <string name="label_hdop">HDOP</string>
+    <string name="status_usb_disconnected">USB 未连接</string>
+    <string name="status_usb_gps_ok">GPS</string>
+    <string name="status_usb_imu_ok">IMU</string>
 </resources>

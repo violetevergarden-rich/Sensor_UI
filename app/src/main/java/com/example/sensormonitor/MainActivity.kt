@@ -37,6 +37,9 @@ import com.example.sensormonitor.model.IotMeasurement
 import com.example.sensormonitor.model.SensorUiState
 import com.example.sensormonitor.model.SpeedUnit
 import com.example.sensormonitor.model.UiRefreshRate
+import com.example.sensormonitor.usb.ImuFrameData
+import com.example.sensormonitor.usb.NmeaGpsData
+import com.example.sensormonitor.usb.UsbSerialManager
 import com.github.mikephil.charting.components.Legend
 import com.github.mikephil.charting.components.LegendEntry
 import com.github.mikephil.charting.components.XAxis
@@ -157,6 +160,21 @@ class MainActivity : AppCompatActivity(), SensorEventListener, SettingsDialogFra
     private var lastAccelTimestampNs = 0L
     private var currentLanguageCode = DEFAULT_LANGUAGE
 
+    private var usbSerialManager: UsbSerialManager? = null
+    private var usbGpsConnected = false
+    private var usbImuConnected = false
+    private var magX = 0f
+    private var magY = 0f
+    private var magZ = 0f
+    private var pressure = 0f
+    private var height = 0f
+    private var quatW = 0f
+    private var quatX = 0f
+    private var quatY = 0f
+    private var quatZ = 0f
+    private var extSvCount = 0
+    private var extHdop = 0f
+
     private val uiState = kotlinx.coroutines.flow.MutableStateFlow(SensorUiState())
 
     override fun attachBaseContext(newBase: Context) {
@@ -259,6 +277,45 @@ class MainActivity : AppCompatActivity(), SensorEventListener, SettingsDialogFra
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) = Unit
 
+    private fun onNmeaGpsData(data: NmeaGpsData) {
+        synchronized(lock) {
+            data.latitude?.let { latitude = it }
+            data.longitude?.let { longitude = it }
+            data.altitude?.let { altitude = it }
+            data.speed?.let { gpsSpeed = it }
+        }
+    }
+
+    private fun onImuFrameData(data: ImuFrameData) {
+        synchronized(lock) {
+            data.accelX?.let { accelX = it }
+            data.accelY?.let { accelY = it }
+            data.accelZ?.let { accelZ = it }
+            data.gyroX?.let { gyroX = it }
+            data.gyroY?.let { gyroY = it }
+            data.gyroZ?.let { gyroZ = it }
+            data.roll?.let { roll = it }
+            data.pitch?.let { pitch = it }
+            data.yaw?.let { yaw = it }
+            data.magX?.let { magX = it }
+            data.magY?.let { magY = it }
+            data.magZ?.let { magZ = it }
+            data.pressure?.let { pressure = it.toFloat() }
+            data.height?.let { height = it.toFloat() }
+            data.quatW?.let { quatW = it }
+            data.quatX?.let { quatX = it }
+            data.quatY?.let { quatY = it }
+            data.quatZ?.let { quatZ = it }
+            data.svCount?.let { extSvCount = it }
+            data.hdop?.let { extHdop = it }
+        }
+    }
+
+    private fun onUsbConnectionChanged(gpsConnected: Boolean, imuConnected: Boolean) {
+        usbGpsConnected = gpsConnected
+        usbImuConnected = imuConnected
+    }
+
     override fun onSettingsUpdated(settings: AppSettings) {
         val oldLanguage = appSettings.languageCode
         appSettings = settings
@@ -295,6 +352,13 @@ class MainActivity : AppCompatActivity(), SensorEventListener, SettingsDialogFra
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         locationRequest = buildLocationRequest(appSettings.sampleIntervalMs)
+
+        usbSerialManager = UsbSerialManager(
+            context = this,
+            onGpsData = { onNmeaGpsData(it) },
+            onImuData = { onImuFrameData(it) },
+            onConnectionChanged = { gps, imu -> onUsbConnectionChanged(gps, imu) },
+        )
     }
 
     private fun setupControls() {
@@ -365,6 +429,28 @@ class MainActivity : AppCompatActivity(), SensorEventListener, SettingsDialogFra
                     binding.tvPitch.text = "%.1f°".format(state.pitch)
                     binding.tvRoll.text = "%.1f°".format(state.roll)
 
+                    binding.tvUsbStatus.text = when {
+                        state.usbGpsConnected && state.usbImuConnected -> "USB: GPS+IMU"
+                        state.usbGpsConnected -> "USB: GPS"
+                        state.usbImuConnected -> "USB: IMU"
+                        else -> getString(R.string.status_usb_disconnected)
+                    }
+                    binding.tvUsbStatus.setTextColor(
+                        if (state.usbGpsConnected || state.usbImuConnected)
+                            ContextCompat.getColor(this@MainActivity, R.color.usb_connected)
+                        else
+                            ContextCompat.getColor(this@MainActivity, R.color.usb_disconnected)
+                    )
+
+                    binding.tvMagX.text = "%.2f".format(state.magX)
+                    binding.tvMagY.text = "%.2f".format(state.magY)
+                    binding.tvMagZ.text = "%.2f".format(state.magZ)
+                    binding.tvPressure.text = if (state.pressure > 0f) "%.1f hPa".format(state.pressure / 100f) else "--"
+                    binding.tvHeight.text = if (state.height > 0f) "%.1f m".format(state.height) else "--"
+                    binding.tvSvCount.text = if (state.svCount > 0) "${state.svCount}" else "--"
+                    binding.tvHdop.text = if (state.hdop > 0f) "%.1f".format(state.hdop) else "--"
+                    binding.tvGpsFix.text = if (state.usbGpsConnected && state.latitude != null) "3D Fix" else "--"
+
                     if (state.isRunning) {
                         appendChartPoints(state)
                     }
@@ -395,6 +481,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener, SettingsDialogFra
 
         if (hasLocationPermission()) startLocationUpdates() else requestLocationPermission()
 
+        usbSerialManager?.start(lifecycleScope)
+
         startMeasurementLogging()
 
         uiTickerJob?.cancel()
@@ -416,7 +504,20 @@ class MainActivity : AppCompatActivity(), SensorEventListener, SettingsDialogFra
                         yaw = yaw,
                         pitch = pitch,
                         roll = roll,
-                        speed = resolveSpeed()
+                        speed = resolveSpeed(),
+                        usbGpsConnected = usbGpsConnected,
+                        usbImuConnected = usbImuConnected,
+                        magX = magX,
+                        magY = magY,
+                        magZ = magZ,
+                        pressure = pressure,
+                        height = height,
+                        quatW = quatW,
+                        quatX = quatX,
+                        quatY = quatY,
+                        quatZ = quatZ,
+                        svCount = extSvCount,
+                        hdop = extHdop,
                     )
                 }
                 uiState.value = snapshot
@@ -430,6 +531,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener, SettingsDialogFra
         isCollectionStarted = false
         sensorManager.unregisterListener(this)
         stopLocationUpdates()
+        usbSerialManager?.stop()
         uiTickerJob?.cancel()
         uiTickerJob = null
         stopMeasurementLogging()
@@ -657,7 +759,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener, SettingsDialogFra
                 val file = File(dir, fileName)
                 BufferedWriter(FileWriter(file, false))
             }
-            writer.write("timestamp,path_id,lat,lon,altitude,speed,accel_x,accel_y,accel_z,gyro_x,gyro_y,gyro_z,pitch,roll,yaw")
+            writer.write("timestamp,path_id,lat,lon,altitude,speed,accel_x,accel_y,accel_z,gyro_x,gyro_y,gyro_z,pitch,roll,yaw,mag_x,mag_y,mag_z,pressure,height,quat_w,quat_x,quat_y,quat_z,sv_count,hdop")
             writer.newLine()
             writer.flush()
             writer
@@ -677,7 +779,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener, SettingsDialogFra
                 AltitudeUnit.METER -> altitude
                 AltitudeUnit.FEET -> altitude?.times(3.28084)
             }
-            val row = "${System.currentTimeMillis()},$currentPathId,${latitude ?: ""},${longitude ?: ""},${altitudeValue ?: ""},$speedText,$accelX,$accelY,$accelZ,$gyroX,$gyroY,$gyroZ,$pitch,$roll,$yaw"
+            val row = "${System.currentTimeMillis()},$currentPathId,${latitude ?: ""},${longitude ?: ""},${altitudeValue ?: ""},$speedText,$accelX,$accelY,$accelZ,$gyroX,$gyroY,$gyroZ,$pitch,$roll,$yaw,$magX,$magY,$magZ,$pressure,$height,$quatW,$quatX,$quatY,$quatZ,$extSvCount,$extHdop"
             val measurement = IotMeasurement(
                 recordTime = LocalDateTime.now(),
                 deviceId = deviceId,
@@ -696,6 +798,17 @@ class MainActivity : AppCompatActivity(), SensorEventListener, SettingsDialogFra
                 roll = roll.toDouble(),
                 yaw = yaw.toDouble(),
                 speed = speedMs,
+                magX = magX.toDouble(),
+                magY = magY.toDouble(),
+                magZ = magZ.toDouble(),
+                pressure = pressure.toDouble(),
+                height = height.toDouble(),
+                quatW = quatW.toDouble(),
+                quatX = quatX.toDouble(),
+                quatY = quatY.toDouble(),
+                quatZ = quatZ.toDouble(),
+                svCount = extSvCount,
+                hdop = extHdop.toDouble(),
             )
             row to measurement
         }

@@ -18,4 +18,11 @@
     <color name="chart_gyro_y">#29B6F6</color>
     <color name="chart_gyro_z">#42A5F5</color>
     <color name="chart_speed">#EF5350</color>
+    <color name="chart_mag_x">#AB47BC</color>
+    <color name="chart_mag_y">#BA68C8</color>
+    <color name="chart_mag_z">#CE93D8</color>
+    <color name="chart_pressure">#FF7043</color>
+    <color name="chart_height">#8D6E63</color>
+    <color name="usb_connected">#4CAF50</color>
+    <color name="usb_disconnected">#9E9E9E</color>
 </resources>

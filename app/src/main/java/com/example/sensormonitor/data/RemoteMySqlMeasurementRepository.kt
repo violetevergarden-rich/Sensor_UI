@@ -38,6 +38,19 @@ object RemoteMySqlMeasurementRepository {
                 put("roll", measurement.roll)
                 put("yaw", measurement.yaw)
                 put("speed", measurement.speed)
+                put("mag_x", measurement.magX)
+                put("mag_y", measurement.magY)
+                put("mag_z", measurement.magZ)
+                put("pressure", measurement.pressure)
+                put("height", measurement.height)
+                put("quat_w", measurement.quatW)
+                put("quat_x", measurement.quatX)
+                put("quat_y", measurement.quatY)
+                put("quat_z", measurement.quatZ)
+                put("sv_count", measurement.svCount)
+                put("pdop", measurement.pdop)
+                put("hdop", measurement.hdop)
+                put("vdop", measurement.vdop)
             }
 
             val connection = URL(INGEST_API_URL).openConnection() as HttpURLConnection

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- CH340X (ATGM336H-5N GPS module): VID=0x1A86, PID=0x7523 -->
+    <usb-device vendor-id="6790" product-id="29987" />
+    <!-- CP2102 (10-axis IMU module): VID=0x10C4, PID=0xEA60 -->
+    <usb-device vendor-id="4292" product-id="60000" />
+</resources>

@@ -37,6 +37,15 @@
             android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
 
         <TextView
+            android:id="@+id/tvUsbStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="10dp"
+            android:text="@string/status_usb_disconnected"
+            android:textColor="@color/usb_disconnected"
+            android:textAppearance="@style/TextAppearance.Material3.BodySmall" />
+
+        <TextView
             android:id="@+id/tvStatus"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -381,14 +390,14 @@
                 android:id="@+id/lineChart"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="2" />
+                android:layout_weight="3" />
 
             <LinearLayout
                 android:id="@+id/dataPanel"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_marginTop="8dp"
-                android:layout_weight="1"
+                android:layout_weight="2"
                 android:background="@color/panel_soft"
                 android:orientation="vertical"
                 android:padding="@dimen/data_panel_padding">
@@ -615,6 +624,212 @@
                             style="@style/TextAppearance.SensorMonitor.DataLabel" />
                         <TextView
                             android:id="@+id/tvRoll"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="6dp"
+                            android:text="--"
+                            style="@style/TextAppearance.SensorMonitor.DataValue" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:layout_margin="@dimen/data_card_margin"
+                        android:background="@color/panel_mid"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:padding="@dimen/data_card_padding">
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/label_mag_x"
+                            style="@style/TextAppearance.SensorMonitor.DataLabel" />
+                        <TextView
+                            android:id="@+id/tvMagX"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="6dp"
+                            android:text="--"
+                            style="@style/TextAppearance.SensorMonitor.DataValue" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:layout_margin="@dimen/data_card_margin"
+                        android:background="@color/panel_mid"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:padding="@dimen/data_card_padding">
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/label_mag_y"
+                            style="@style/TextAppearance.SensorMonitor.DataLabel" />
+                        <TextView
+                            android:id="@+id/tvMagY"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="6dp"
+                            android:text="--"
+                            style="@style/TextAppearance.SensorMonitor.DataValue" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:layout_margin="@dimen/data_card_margin"
+                        android:background="@color/panel_mid"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:padding="@dimen/data_card_padding">
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/label_mag_z"
+                            style="@style/TextAppearance.SensorMonitor.DataLabel" />
+                        <TextView
+                            android:id="@+id/tvMagZ"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="6dp"
+                            android:text="--"
+                            style="@style/TextAppearance.SensorMonitor.DataValue" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:layout_margin="@dimen/data_card_margin"
+                        android:background="@color/panel_mid"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:padding="@dimen/data_card_padding">
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/label_pressure"
+                            style="@style/TextAppearance.SensorMonitor.DataLabel" />
+                        <TextView
+                            android:id="@+id/tvPressure"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="6dp"
+                            android:text="--"
+                            style="@style/TextAppearance.SensorMonitor.DataValue" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:layout_margin="@dimen/data_card_margin"
+                        android:background="@color/panel_mid"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:padding="@dimen/data_card_padding">
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/label_height"
+                            style="@style/TextAppearance.SensorMonitor.DataLabel" />
+                        <TextView
+                            android:id="@+id/tvHeight"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="6dp"
+                            android:text="--"
+                            style="@style/TextAppearance.SensorMonitor.DataValue" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:layout_margin="@dimen/data_card_margin"
+                        android:background="@color/panel_mid"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:padding="@dimen/data_card_padding">
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/label_sv_count"
+                            style="@style/TextAppearance.SensorMonitor.DataLabel" />
+                        <TextView
+                            android:id="@+id/tvSvCount"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="6dp"
+                            android:text="--"
+                            style="@style/TextAppearance.SensorMonitor.DataValue" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:layout_margin="@dimen/data_card_margin"
+                        android:background="@color/panel_mid"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:padding="@dimen/data_card_padding">
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/label_hdop"
+                            style="@style/TextAppearance.SensorMonitor.DataLabel" />
+                        <TextView
+                            android:id="@+id/tvHdop"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="6dp"
+                            android:text="--"
+                            style="@style/TextAppearance.SensorMonitor.DataValue" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:layout_margin="@dimen/data_card_margin"
+                        android:background="@color/panel_mid"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:padding="@dimen/data_card_padding">
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/label_gps_fix"
+                            style="@style/TextAppearance.SensorMonitor.DataLabel" />
+                        <TextView
+                            android:id="@+id/tvGpsFix"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="6dp"
