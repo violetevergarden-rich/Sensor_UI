@@ -305,6 +305,10 @@ class MainActivity : AppCompatActivity(), SensorEventListener, SettingsDialogFra
             data.speed?.let { gpsSpeed = it }
             data.course?.let { course = it }
             data.fixQuality?.let { fixQuality = it }
+            data.svCount?.let { extSvCount = it }
+            data.hdop?.let { extHdop = it }
+            data.pdop?.let { extPdop = it }
+            data.vdop?.let { extVdop = it }
         }
     }
 

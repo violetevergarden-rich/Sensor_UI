@@ -88,8 +88,8 @@
     <string name="status_usb_imu_ok">IMU</string>
     <string name="settings_upload_enabled">Enable DB Upload</string>
     <string name="settings_server_url">Server URL</string>
-    <string name="settings_server_url_hint">http://47.104.147.148:18080/measurements</string>
-    <string name="settings_server_url_default">http://47.104.147.148:18080/measurements</string>
+    <string name="settings_server_url_hint">http://47.104.147.148/sensor-api/measurements</string>
+    <string name="settings_server_url_default">http://47.104.147.148/sensor-api/measurements</string>
     <string name="status_upload_ok">Upload OK (%d)</string>
     <string name="status_upload_error">Upload failed (%d)</string>
 </resources>

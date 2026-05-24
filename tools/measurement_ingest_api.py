@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import socket
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 import pymysql
@@ -108,5 +109,7 @@ class MeasurementHandler(BaseHTTPRequestHandler):
 
 
 if __name__ == "__main__":
+    ThreadingHTTPServer.allow_reuse_address = True
     server = ThreadingHTTPServer((HOST, PORT), MeasurementHandler)
+    print(f"Sensor Ingest API listening on {HOST}:{PORT}")
     server.serve_forever()

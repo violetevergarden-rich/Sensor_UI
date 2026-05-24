@@ -108,8 +108,8 @@
     <string name="label_vdop">VDOP</string>
     <string name="settings_upload_enabled">启用数据库上传</string>
     <string name="settings_server_url">服务器地址</string>
-    <string name="settings_server_url_hint">http://47.104.147.148:18080/measurements</string>
-    <string name="settings_server_url_default">http://47.104.147.148:18080/measurements</string>
+    <string name="settings_server_url_hint">http://47.104.147.148/sensor-api/measurements</string>
+    <string name="settings_server_url_default">http://47.104.147.148/sensor-api/measurements</string>
     <string name="status_upload_ok">上传成功 (%d)</string>
     <string name="status_upload_error">上传失败 (%d)</string>
 </resources>

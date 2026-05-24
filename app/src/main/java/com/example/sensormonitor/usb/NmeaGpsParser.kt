@@ -24,6 +24,7 @@ object NmeaGpsParser {
             "RMC" -> parseRmc(parts)
             "VTG" -> parseVtg(parts)
             "GSA" -> parseGsa(parts)
+            "GSV" -> parseGsv(parts)
             else -> null
         }
     }
@@ -75,7 +76,16 @@ object NmeaGpsParser {
         return NmeaGpsData(
             pdop = fields.getOrNull(15)?.toFloatOrNull(),
             hdop = fields.getOrNull(16)?.toFloatOrNull(),
-            vdop = fields.getOrNull(17)?.dropLast(3)?.toFloatOrNull(),
+            vdop = fields.getOrNull(17)?.toFloatOrNull(),
+        )
+    }
+
+    private fun parseGsv(fields: List<String>): NmeaGpsData {
+        // Only extract total SV count from the first message in the group
+        val msgNum = fields.getOrNull(2)?.toIntOrNull() ?: return NmeaGpsData()
+        if (msgNum != 1) return NmeaGpsData()
+        return NmeaGpsData(
+            svCount = fields.getOrNull(3)?.toIntOrNull(),
         )
     }
 

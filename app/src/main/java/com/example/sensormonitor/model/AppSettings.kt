@@ -28,5 +28,5 @@ data class AppSettings(
     val smoothingAlpha: Float = 0.85f,
     val uiRefreshRate: UiRefreshRate = UiRefreshRate.HZ_10,
     val uploadEnabled: Boolean = false,
-    val serverUrl: String = "http://47.104.147.148:18080/measurements",
+    val serverUrl: String = "http://47.104.147.148/sensor-api/measurements",
 )

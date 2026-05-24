@@ -21,6 +21,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
+private data class UsbDeviceId(val vid: Int, val pid: Int)
+
 class UsbSerialManager(
     private val context: Context,
     private val onGpsData: (NmeaGpsData) -> Unit,
@@ -29,8 +31,10 @@ class UsbSerialManager(
 ) {
     companion object {
         private const val TAG = "UsbSerialManager"
-        private const val DEVICE_VID = 0x1A86
-        private const val DEVICE_PID = 0x7523
+        private val SUPPORTED_DEVICES = listOf(
+            UsbDeviceId(0x1A86, 0x7523),  // CH340X (ATGM336H-5N GPS)
+            UsbDeviceId(0x10C4, 0xEA60),  // CP2102 (10-axis IMU)
+        )
         private const val BAUD_RATE = 9600
         private const val RECONNECT_INTERVAL_MS = 10_000L
         private const val ACTION_USB_PERMISSION = "com.example.sensormonitor.USB_PERMISSION"
@@ -132,19 +136,23 @@ class UsbSerialManager(
             val pid = device.productId
             Log.d(TAG, "probe: device VID=0x${vid.toString(16)} PID=0x${pid.toString(16)} name=${device.deviceName}")
 
-            if (vid == DEVICE_VID && pid == DEVICE_PID) {
-                if (usbManager.hasPermission(device)) {
-                    connectDevice(device)
-                } else {
-                    usbManager.requestPermission(device, permissionIntent)
-                }
+            val supported = SUPPORTED_DEVICES.any { it.vid == vid && it.pid == pid }
+            if (!supported) {
+                Log.d(TAG, "probe: ignoring unsupported device VID=0x${vid.toString(16)} PID=0x${pid.toString(16)}")
+                continue
+            }
+
+            if (usbManager.hasPermission(device)) {
+                connectDevice(device, "probe")
+            } else {
+                usbManager.requestPermission(device, permissionIntent)
             }
         }
     }
 
-    private fun connectDevice(device: UsbDevice) {
+    private fun connectDevice(device: UsbDevice, source: String = "broadcast") {
         val deviceName = device.deviceName
-        Log.d(TAG, "connectDevice: name=$deviceName")
+        Log.d(TAG, "connectDevice: name=$deviceName source=$source")
 
         // Reconnect: if we already know this device, skip sniffing
         val knownRole = when (deviceName) {
@@ -192,6 +200,13 @@ class UsbSerialManager(
                     gpsDeviceName = deviceName
                     gpsConnected = true
                     Log.d(TAG, "openDevicePort: GPS port opened ($deviceName)")
+                    try {
+                        port.setDTR(true)
+                        port.setRTS(false)
+                        Log.d(TAG, "openDevicePort: GPS DTR=true RTS=false set")
+                    } catch (e: Exception) {
+                        Log.d(TAG, "openDevicePort: GPS DTR/RTS not supported", e)
+                    }
                     notifyConnectionChanged()
                     startGpsReader(port)
                 }
@@ -211,37 +226,37 @@ class UsbSerialManager(
     }
 
     private fun detectDeviceRole(port: UsbSerialPort, deviceName: String): String? {
-        val sniff = ByteArray(64)
-        val len = try {
-            port.read(sniff, 500)
-        } catch (e: Exception) {
-            Log.e(TAG, "detectDeviceRole: read failed for $deviceName", e)
-            -1
-        }
-        if (len <= 0) {
-            Log.d(TAG, "detectDeviceRole: no data from $deviceName, using fallback")
-            // Fallback: first-come, first-serve
-            return when {
-                !gpsConnected -> "gps"
-                !imuConnected -> "imu"
-                else -> null
+        // Try sniffing twice to handle slow-starting GPS modules
+        for (attempt in 1..2) {
+            val sniff = ByteArray(64)
+            val len = try {
+                port.read(sniff, 500)
+            } catch (e: Exception) {
+                Log.e(TAG, "detectDeviceRole: read failed for $deviceName (attempt $attempt)", e)
+                -1
+            }
+            if (len > 0) {
+                Log.d(TAG, "detectDeviceRole: sniffed $len bytes from $deviceName (attempt $attempt)")
+                for (i in 0 until len) {
+                    val b = sniff[i].toInt() and 0xFF
+                    when (b) {
+                        0x24 -> { // '$' = NMEA GPS
+                            Log.d(TAG, "detectDeviceRole: $deviceName → GPS (NMEA, byte $i)")
+                            return "gps"
+                        }
+                        0x55 -> { // IMU binary frame header
+                            Log.d(TAG, "detectDeviceRole: $deviceName → IMU (binary, byte $i)")
+                            return "imu"
+                        }
+                    }
+                }
+                Log.d(TAG, "detectDeviceRole: no signature byte in $len bytes from $deviceName (attempt $attempt)")
+            } else {
+                Log.d(TAG, "detectDeviceRole: no data from $deviceName (attempt $attempt)")
             }
         }
-        // Scan for NMEA header ($) or IMU header (0x55)
-        for (i in 0 until len) {
-            val b = sniff[i].toInt() and 0xFF
-            when (b) {
-                0x24 -> { // '$' = NMEA GPS
-                    Log.d(TAG, "detectDeviceRole: $deviceName → GPS (NMEA)")
-                    return "gps"
-                }
-                0x55 -> { // IMU binary frame header
-                    Log.d(TAG, "detectDeviceRole: $deviceName → IMU (binary)")
-                    return "imu"
-                }
-            }
-        }
-        Log.d(TAG, "detectDeviceRole: couldn't determine role from $len bytes, using fallback for $deviceName")
+        // Fallback: first-come, first-serve
+        Log.d(TAG, "detectDeviceRole: using fallback for $deviceName (gpsConnected=$gpsConnected imuConnected=$imuConnected)")
         return when {
             !gpsConnected -> "gps"
             !imuConnected -> "imu"
@@ -264,10 +279,30 @@ class UsbSerialManager(
         gpsReaderJob = CoroutineScope(Dispatchers.IO).launch {
             val buffer = ByteArray(256)
             val lineBuffer = StringBuilder()
+            var readCount = 0
+            var lineCount = 0
+            var parsedCount = 0
             try {
+                // Send CASIC init command to ensure continuous 1Hz output
+                try {
+                    val initCmd = "\$PCAS04,1*18\r\n".toByteArray()
+                    port.write(initCmd, 500)
+                    Log.d(TAG, "GPS reader: sent init command \$PCAS04,1")
+                } catch (e: Exception) {
+                    Log.d(TAG, "GPS reader: init command failed (non-critical)", e)
+                }
+
+                Log.d(TAG, "GPS reader: started reading")
                 while (isActive) {
-                    val len = port.read(buffer, 200)
-                    if (len < 0) break
+                    val len = port.read(buffer, 1000)
+                    if (len < 0) {
+                        Log.d(TAG, "GPS reader: port.read returned $len, breaking")
+                        break
+                    }
+                    readCount++
+                    if (readCount <= 5 || readCount % 10 == 0) {
+                        Log.d(TAG, "GPS reader: read #$readCount got $len bytes")
+                    }
                     for (i in 0 until len) {
                         val c = buffer[i].toInt().toChar()
                         if (c == '\n') {
@@ -276,9 +311,18 @@ class UsbSerialManager(
                             if (line.startsWith("$")) {
                                 val data = gpsParser.parse(line)
                                 if (data != null) {
+                                    parsedCount++
                                     onGpsData(data)
+                                    if (parsedCount <= 3) {
+                                        Log.d(TAG, "GPS reader: parsed #$parsedCount: ${line.take(60)}")
+                                    }
+                                } else if (lineCount < 10) {
+                                    Log.d(TAG, "GPS reader: parse failed for: ${line.take(50)}")
                                 }
+                            } else if (line.isNotEmpty() && lineCount < 5) {
+                                Log.d(TAG, "GPS reader: non-NMEA line: ${line.take(50)}")
                             }
+                            lineCount++
                         } else if (c != '\r') {
                             lineBuffer.append(c)
                         }
@@ -289,7 +333,7 @@ class UsbSerialManager(
                     Log.e(TAG, "GPS reader error", e)
                 }
             } finally {
-                Log.d(TAG, "GPS reader ended")
+                Log.d(TAG, "GPS reader ended (reads=$readCount lines=$lineCount parsed=$parsedCount)")
                 closeGpsPort()
             }
         }
