@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="data_panel_padding">4dp</dimen>
+    <dimen name="data_card_margin">2dp</dimen>
+    <dimen name="data_card_padding">4dp</dimen>
+    <dimen name="data_label_text_size">9sp</dimen>
+    <dimen name="data_value_text_size">10sp</dimen>
+    <dimen name="data_label_min_text_size">7sp</dimen>
+    <dimen name="data_value_min_text_size">8sp</dimen>
+</resources>

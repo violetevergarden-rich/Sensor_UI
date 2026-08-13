@@ -186,6 +186,15 @@ class UsbSerialManager(
             port.open(connection)
             port.setParameters(BAUD_RATE, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE)
 
+            // Try to set DTR/RTS early to wake up some modules before sniffing
+            try {
+                port.setDTR(true)
+                port.setRTS(false)
+            } catch (e: Exception) {
+                Log.d(TAG, "Early DTR/RTS not supported", e)
+            }
+            Thread.sleep(100) // Give hardware brief time to react
+
             // Auto-detect role by sniffing data
             val role = knownRole ?: detectDeviceRole(port, deviceName)
             if (role == null) {
@@ -226,16 +235,18 @@ class UsbSerialManager(
     }
 
     private fun detectDeviceRole(port: UsbSerialPort, deviceName: String): String? {
-        // Try sniffing twice to handle slow-starting GPS modules
-        for (attempt in 1..2) {
+        // Try sniffing more times with longer timeout to handle slow-starting GPS modules
+        for (attempt in 1..4) {
             val sniff = ByteArray(64)
             val len = try {
-                port.read(sniff, 500)
+                port.read(sniff, 1500)
             } catch (e: Exception) {
                 Log.e(TAG, "detectDeviceRole: read failed for $deviceName (attempt $attempt)", e)
                 -1
             }
             if (len > 0) {
+                val hexStr = sniff.take(len).joinToString(" ") { String.format("%02X", it) }
+                Log.d(TAG, "detectDeviceRole: sniffed $len bytes (hex): $hexStr")
                 Log.d(TAG, "detectDeviceRole: sniffed $len bytes from $deviceName (attempt $attempt)")
                 for (i in 0 until len) {
                     val b = sniff[i].toInt() and 0xFF
@@ -280,10 +291,10 @@ class UsbSerialManager(
             val buffer = ByteArray(256)
             val lineBuffer = StringBuilder()
             var readCount = 0
-            var lineCount = 0
             var parsedCount = 0
             try {
                 // Send CASIC init command to ensure continuous 1Hz output
+                // ATGM336H-5N defaults to adaptive/power-save mode; $PCAS04,1 forces 1Hz continuous
                 try {
                     val initCmd = "\$PCAS04,1*18\r\n".toByteArray()
                     port.write(initCmd, 500)
@@ -294,15 +305,12 @@ class UsbSerialManager(
 
                 Log.d(TAG, "GPS reader: started reading")
                 while (isActive) {
-                    val len = port.read(buffer, 1000)
+                    val len = port.read(buffer, 500)
                     if (len < 0) {
                         Log.d(TAG, "GPS reader: port.read returned $len, breaking")
                         break
                     }
                     readCount++
-                    if (readCount <= 5 || readCount % 10 == 0) {
-                        Log.d(TAG, "GPS reader: read #$readCount got $len bytes")
-                    }
                     for (i in 0 until len) {
                         val c = buffer[i].toInt().toChar()
                         if (c == '\n') {
@@ -313,19 +321,14 @@ class UsbSerialManager(
                                 if (data != null) {
                                     parsedCount++
                                     onGpsData(data)
-                                    if (parsedCount <= 3) {
-                                        Log.d(TAG, "GPS reader: parsed #$parsedCount: ${line.take(60)}")
-                                    }
-                                } else if (lineCount < 10) {
-                                    Log.d(TAG, "GPS reader: parse failed for: ${line.take(50)}")
                                 }
-                            } else if (line.isNotEmpty() && lineCount < 5) {
-                                Log.d(TAG, "GPS reader: non-NMEA line: ${line.take(50)}")
                             }
-                            lineCount++
                         } else if (c != '\r') {
                             lineBuffer.append(c)
                         }
+                    }
+                    if (readCount == 1 || readCount % 100 == 0) {
+                        Log.d(TAG, "GPS reader: read #$readCount, $parsedCount sentences parsed")
                     }
                 }
             } catch (e: Exception) {
@@ -333,7 +336,7 @@ class UsbSerialManager(
                     Log.e(TAG, "GPS reader error", e)
                 }
             } finally {
-                Log.d(TAG, "GPS reader ended (reads=$readCount lines=$lineCount parsed=$parsedCount)")
+                Log.d(TAG, "GPS reader ended (reads=$readCount parsed=$parsedCount)")
                 closeGpsPort()
             }
         }

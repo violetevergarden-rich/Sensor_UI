@@ -297,8 +297,13 @@ class MainActivity : AppCompatActivity(), SensorEventListener, SettingsDialogFra
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) = Unit
 
+    private var gpsPositionLogged = false
     private fun onNmeaGpsData(data: NmeaGpsData) {
         synchronized(lock) {
+            if (data.latitude != null && data.longitude != null && !gpsPositionLogged) {
+                Log.d(TAG, "onNmeaGpsData: first GPS fix received lat=${data.latitude} lon=${data.longitude}")
+                gpsPositionLogged = true
+            }
             data.latitude?.let { latitude = it }
             data.longitude?.let { longitude = it }
             data.altitude?.let { altitude = it }
